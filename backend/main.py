@@ -19,19 +19,29 @@ app = FastAPI(title="Omni-Agent AI Backend", version="1.0.0")
 class Query(BaseModel):
     prompt: str
 
-# --- Agent Logic (Scaffold for LangGraph) ---
+# --- Integrated Memory & Reasoning ---
+from memory_schema import OmniMemorySystem
+
+memory = OmniMemorySystem(user_id="default_user", session_id="session_001")
+
 def planner(state: AgentState):
-    """الوكيل المخطط: يقوم بتحليل الهدف وتقسيمه لخطوات"""
-    # في الواقع سنستخدم LLM هنا
-    print(f"Planning for: {state['input']}")
-    return {"plan": ["البحث عن البيانات", "تحليل الاتجاهات", "صياغة التقرير"], "current_step": 0}
+    """الوكيل المخطط: يستخدم الذاكرة لرسم خطة دقيقة"""
+    context = memory.get_context(state['input'])
+    print(f"Planning with Context: {context}")
+    # محاكاة التخطيط الذكي بناءً على السياق
+    plan = ["تحليل سياق الطلب", "استرجاع المعلومات من الذاكرة الدلالية", "توليد الإجابة النهائية"]
+    return {"plan": plan, "current_step": 0}
 
 def executor(state: AgentState):
-    """الوكيل المنفذ: ينفذ الخطوة الحالية"""
+    """الوكيل المنفذ: ينفذ الخطوات ويحدث الذاكرة العرضية"""
     step = state['plan'][state['current_step']]
-    print(f"Executing step: {step}")
-    # محاكاة التنفيذ
-    state['results'][step] = f"تم إنجاز {step} بنجاح"
+    print(f"Executing: {step}")
+    
+    # محاكاة العمل وتحديث الذاكرة
+    result = f"النتيجة لـ {step}"
+    memory.episodic.add_event(f"نفذت الخطوة: {step} بنجاح.")
+    
+    state['results'][step] = result
     return {"results": state['results'], "current_step": state['current_step'] + 1}
 
 def should_continue(state: AgentState):
