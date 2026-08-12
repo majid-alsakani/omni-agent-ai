@@ -2,24 +2,47 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
+from typing import Literal
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel, Field
 
 from .agent_engine import AgentEngine
 from .memory import MemoryStore
+from .multi_agent import MultiAgentEngine
+from .vector_memory import LocalVectorBackend, PostgresVectorBackend, VectorMemoryBackend
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MEMORY_PATH = PROJECT_ROOT / "data" / "memory.json"
-store = MemoryStore(MEMORY_PATH)
+
+
+def _build_vector_backend() -> tuple[VectorMemoryBackend, str]:
+    """Choose pgvector when configured, otherwise keep local development frictionless."""
+    dsn = os.getenv("OMNI_VECTOR_DSN") or os.getenv("DATABASE_URL")
+    if not dsn:
+        return LocalVectorBackend(), "local-hashed-vector"
+    try:
+        backend = PostgresVectorBackend(dsn)
+        backend.ensure_schema()
+        return backend, backend.name
+    except Exception:
+        if os.getenv("ALLOW_LOCAL_VECTOR_FALLBACK", "1") != "1":
+            raise
+        return LocalVectorBackend(), "local-hashed-vector-fallback"
+
+
+vector_backend, vector_backend_name = _build_vector_backend()
+store = MemoryStore(MEMORY_PATH, vector_backend=vector_backend)
 engine = AgentEngine(store)
+multi_engine = MultiAgentEngine(store)
 
 app = FastAPI(
     title="Omni-Agent AI",
-    version="2.1.0",
-    description="A testable LangGraph agent with persistent episodic and semantic memory.",
+    version="3.0.0",
+    description="A testable LangGraph single-agent and self-planning multi-agent system with persistent memory.",
 )
 
 
@@ -27,6 +50,16 @@ class Query(BaseModel):
     prompt: str = Field(min_length=1, max_length=10_000)
     user_id: str = Field(default="default_user", min_length=1, max_length=128)
     session_id: str = Field(default="default_session", min_length=1, max_length=128)
+    mode: Literal["single", "multi", "auto"] = "auto"
+
+
+def _is_complex(prompt: str) -> bool:
+    lower = prompt.casefold()
+    signals = (
+        "عدة وكلاء", "متعدد", "معقد", "قارن", "خطة شاملة", "بحث وتحليل", "مخاطر",
+        "multi-agent", "complex", "compare", "research and analyze", "risk",
+    )
+    return len(prompt.split()) >= 12 or any(signal in lower for signal in signals)
 
 
 @app.get("/")
@@ -36,22 +69,39 @@ async def root() -> dict[str, str]:
 
 @app.get("/health")
 async def health() -> dict[str, object]:
-    return {"status": "ok", "memory_records": len(store.records), "engine": "langgraph"}
+    return {
+        "status": "ok",
+        "memory_records": len(store.records),
+        "engines": ["langgraph-single", "langgraph-multi-agent"],
+        "vector_store": vector_backend_name,
+    }
 
 
 @app.post("/ask")
 async def ask_agent(query: Query) -> dict[str, object]:
     try:
-        result = engine.run(
-            query.prompt,
-            user_id=query.user_id,
-            session_id=query.session_id,
-        )
-        return {"status": "success", "data": result}
+        selected_mode = "multi" if query.mode == "auto" and _is_complex(query.prompt) else query.mode
+        if selected_mode == "multi":
+            result = multi_engine.run(query.prompt, user_id=query.user_id, session_id=query.session_id)
+        else:
+            result = engine.run(query.prompt, user_id=query.user_id, session_id=query.session_id)
+        return {"status": "success", "mode": selected_mode, "data": result}
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Agent execution failed") from exc
+
+
+@app.post("/multi-ask")
+async def multi_ask_agent(query: Query) -> dict[str, object]:
+    """Explicit entry point for autonomous multi-agent planning."""
+    try:
+        result = multi_engine.run(query.prompt, user_id=query.user_id, session_id=query.session_id)
+        return {"status": "success", "mode": "multi", "data": result}
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Multi-agent execution failed") from exc
 
 
 @app.get("/memory")

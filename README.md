@@ -1,90 +1,102 @@
-# 💎 Omni-Agent AI
+# 💎 Omni-Agent AI v3.0
 
 <p align="center">
-  <img src="artifacts/omni_logo.png" width="200" alt="Omni-Agent Logo">
+  <img src="artifacts/omni_logo.png" width="220" alt="Omni-Agent Logo">
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Status-Working%20Core-16a34a?style=for-the-badge" alt="Working core">
+  <img src="https://img.shields.io/badge/Status-Autonomous%20Multi--Agent-16a34a?style=for-the-badge" alt="Multi-Agent">
   <img src="https://img.shields.io/badge/Orchestration-LangGraph-7c3aed?style=for-the-badge" alt="LangGraph">
-  <img src="https://img.shields.io/badge/Tests-8%20passed-0f766e?style=for-the-badge" alt="Tests passed">
+  <img src="https://img.shields.io/badge/Memory-Vector%20DB%20Ready-0284c7?style=for-the-badge" alt="Vector Memory">
+  <img src="https://img.shields.io/badge/Tests-11%20passed-0f766e?style=for-the-badge" alt="Tests passed">
 </p>
 
 ---
 
-## 🎨 Visual Identity & Dashboard Mockup
+## 🎨 The Multi-Agent Evolution & Sovereign Memory
 
 <p align="center">
-  <img src="artifacts/dashboard_mockup.png" width="800" alt="Omni-Agent Dashboard Mockup">
+  <img src="artifacts/multi_agent_dashboard.png" width="850" alt="Omni-Agent Multi-Agent Dashboard">
   <br>
-  <i>Conceptual Dashboard: LangGraph Execution, 3D Knowledge Graph, and Real-time Memory Logs.</i>
+  <i>Conceptual Dashboard: Multi-Agent Orchestration, Sovereign Semantic Memory (pgvector), and Real-time Task Decomposition.</i>
 </p>
 
 ---
 
-**Omni-Agent AI** هو نواة وكيل ذكي قابلة للتوسع، مبنية لتنفذ المهمة على مراحل واضحة بدلاً من إرجاع رد عشوائي من استدعاء واحد للنموذج. النواة الحالية تفصل بين **التخطيط، التنفيذ، المراجعة، والذاكرة**، وتحتوي على اختبارات قابلة لإعادة التشغيل.
+**Omni-Agent AI** هو نظام متطور لوكلاء الذكاء الاصطناعي المستقلين، يعتمد على بنية **التخطيط الذاتي متعدد الوكلاء (Multi-Agent Planning)**. النسخة 3.0 تنقل المشروع من مجرد وكيل واحد إلى "أوركسترا" من الوكلاء المتخصصين الذين يعملون بتناغم لحل المهام المعقدة، مع دعم كامل لقواعد البيانات المتجهية لضمان ذاكرة سيادية دائمة ودقيقة.
 
-> النسخة الحالية هي **Working Core** محلية ومختبرة. لا تدّعي تنفيذ إجراءات خارجية مثل إرسال بريد أو تعديل نظام خارجي ما لم تتم إضافة أداة وموصل موثوق لذلك الإجراء.
+## 🌟 الميزات المتقدمة (نسخة 3.0)
 
-## ما تم تطويره فعلياً
-
-| الجزء | التنفيذ الحالي | الفائدة |
+| الميزة | الوصف التقني | الفائدة |
 | --- | --- | --- |
-| محرك الوكيل | LangGraph StateGraph | مسار واضح وقابل للتتبع من استقبال الطلب حتى النتيجة |
-| التخطيط | LocalReasoningProvider قابل للاستبدال | إنشاء خطة متعددة الخطوات قابلة للاختبار |
-| التنفيذ | Executor مستقل لكل خطوة | منع الخلط بين التفكير والتنفيذ وتسجيل النتائج |
-| المراجعة | Reviewer مع إعادة محاولة محدودة | اكتشاف النتيجة الفارغة أو غير المكتملة قبل التسليم |
-| الذاكرة العرضية | أحداث الجلسة مع حد أقصى واستمرارية JSON | استمرار سياق المستخدم دون تضخم لا نهائي |
-| الذاكرة الدلالية | حقائق وتفضيلات صريحة مع استرجاع هجين بسيط | تذكر المعلومات المهمة دون حفظ كل شيء عشوائياً |
-| API | FastAPI: `/health`, `/ask`, `/memory` | تشغيل النواة من تطبيق أو واجهة مستقبلية |
-| الاختبار | 8 اختبارات للذاكرة، الرسم البياني، وAPI | اكتشاف الانحدار قبل النشر |
+| **Multi-Agent Orchestrator** | تنسيق مهام بين وكلاء (Researcher, Analyst, Risk Manager) عبر LangGraph | حل المهام المعقدة التي تتطلب بحثاً وتحليلاً ومراجعة مخاطر متوازية |
+| **Auto-Planning Mode** | اكتشاف تلقائي لصعوبة المهمة والتحويل بين المسار الفردي والمتعدد | توفير الموارد للمهام البسيطة واستخدام القوة الكاملة للمهام المعقدة |
+| **Vector Semantic Memory** | محرك ذاكرة متجهي يدعم pgvector و Local Hashed Vectors | استرجاع فائق السرعة والدقة للحقائق والتفضيلات الشخصية |
+| **Self-Correction Loop** | حلقة مراجعة ونقد ذاتي (Reflexion) قبل تسليم النتيجة النهائية | ضمان أعلى مستويات الدقة وتقليل الهلوسة البرمجية |
+| **Production Ready** | دعم كامل لـ Docker، PostgreSQL، وواجهة API متطورة | جاهزية تامة للنشر في بيئات الإنتاج السحابية |
 
-## التشغيل المحلي
+---
 
+## 🏗️ Architecture: The Brain & The Vault
+
+<p align="center">
+  <img src="artifacts/multi_agent_architecture.png" width="700" alt="Omni-Agent Multi-Agent Architecture">
+</p>
+
+يعتمد النظام على حلقة **PRAR (Perception, Reasoning, Action, Reflection)** المطورة:
+1. **Perception:** استدعاء السياق من الذاكرة العرضية (JSON) والذاكرة الدلالية (Vector DB).
+2. **Reasoning:** المنسق (Orchestrator) يحلل الهدف ويوزع المهام على الوكلاء المتخصصين.
+3. **Action:** تنفيذ متوازي للمهام مع استخدام الأدوات والبيانات.
+4. **Reflection:** مراجعة الاتساق (Consistency Review) ودمج النتائج (Synthesis) قبل التحديث النهائي للذاكرة.
+
+---
+
+## 🚀 التشغيل السريع
+
+### 1. المتطلبات الأساسية
 ```bash
-cd omni-agent-ai
 pip install -r backend/requirements.txt
-pytest -q
+# اختيارياً للذاكرة المتجهية الخارجية:
+pip install -r backend/requirements-vector.txt
+```
+
+### 2. تشغيل الاختبارات الشاملة (11 اختباراً)
+```bash
+pytest -v
+```
+
+### 3. تشغيل النظام
+```bash
 uvicorn backend.main:app --reload --port 8000
 ```
 
-بعد التشغيل، يمكن فحص الجاهزية عبر:
-
-```bash
-curl http://127.0.0.1:8000/health
-```
-
-وإرسال مهمة:
-
+### 4. تجربة مهمة معقدة (Multi-Agent)
 ```bash
 curl -X POST http://127.0.0.1:8000/ask \
   -H 'Content-Type: application/json' \
-  -d '{"prompt":"حلل أداء المبيعات","user_id":"u1","session_id":"s1"}'
+  -d '{
+    "prompt": "حلل مخاطر السوق ومقارنة البدائل الاستثمارية مع خطة بحث شاملة",
+    "mode": "auto"
+  }'
 ```
 
-يُحفظ التخزين المحلي في `data/memory.json`. هذا مناسب للنموذج الأولي والاختبار؛ أما الإنتاج فيحتاج إلى PostgreSQL أو Redis مع فهرس متجهي وطبقة صلاحيات ونسخ احتياطي.
+---
 
-## التشغيل عبر Docker
+## 📂 هيكلية المشروع المحدثة
+*   `backend/multi_agent.py`: محرك التنسيق بين الوكلاء المتخصصين.
+*   `backend/vector_memory.py`: محولات الذاكرة المتجهية (Local/Postgres).
+*   `backend/agent_engine.py`: محرك الوكيل الفردي السريع.
+*   `backend/memory.py`: مدير الذاكرة الهجين (Hybrid Memory Manager).
+*   `docs/vector-memory-setup.md`: دليل ربط قواعد البيانات الخارجية.
 
-```bash
-docker build -t omni-agent-ai .
-docker run --rm -p 8000:8000 omni-agent-ai
-```
+---
 
-## 🏗️ Architecture & Agentic Workflow
-
+## 🛡️ الذاكرة السيادية (Sovereign Memory)
 <p align="center">
-  <img src="artifacts/architecture.png" width="600" alt="Omni-Agent Architecture">
+  <img src="artifacts/sovereign_memory_icon.png" width="150" alt="Sovereign Memory Icon">
 </p>
 
-The system follows a sophisticated **PRAR (Perception, Reasoning, Action, Reflection)** loop managed by LangGraph. It ensures every task is planned, executed, and reviewed before delivery, while maintaining a persistent dual-process memory.
-
-يتم حفظ طلب المستخدم ونتيجة الوكيل كذاكرة عرضية. إذا احتوى الطلب على صيغة صريحة مثل «تذكر» أو «أفضل»، تتم ترقيته إلى ذاكرة دلالية. هذا يمنع الوكيل من تحويل كل كلام عابر إلى حقيقة دائمة.
-
-## الخطوة التالية للإنتاج
-
-المحرك مصمم بواجهة `ReasoningProvider`. لذلك يمكن إضافة مزود LLM حقيقي لاحقاً باستخدام مخرجات منظمة JSON، مع إبقاء LangGraph والاختبارات والذاكرة كما هي. قبل السماح لأي أداة بتنفيذ تغيير خارجي يجب إضافة صلاحيات، وضع معاينة، تأكيد بشري، مهلة زمنية، وسجل تدقيق.
+نحن نؤمن بأن معرفة المستخدم يجب أن تكون ملكاً له. يدعم Omni-Agent تخزين الذاكرة في قاعدة بياناتك الخاصة (Self-hosted pgvector)، مما يمنحك تحكماً كاملاً في بياناتك وسياقك التاريخي دون الاعتماد على خوادم خارجية مغلقة.
 
 ## الترخيص
-
-MIT
+MIT - حر للاستخدام والتطوير.

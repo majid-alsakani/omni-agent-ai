@@ -1,0 +1,2 @@
+# Optional production dependencies for external semantic memory
+psycopg[binary]>=3.2,<4

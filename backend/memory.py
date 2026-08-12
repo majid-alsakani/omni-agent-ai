@@ -17,6 +17,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Iterable, Optional
 
+from .vector_memory import LocalVectorBackend, VectorMemoryBackend
+
 
 _TOKEN_RE = re.compile(r"[\w\u0600-\u06ff]+", re.UNICODE)
 _STOP_WORDS = {
@@ -71,12 +73,19 @@ class MemoryRecord:
 class MemoryStore:
     """Thread-safe persistent memory with deterministic hybrid lexical retrieval."""
 
-    def __init__(self, path: str | Path | None = None, max_episodic_per_session: int = 100) -> None:
+    def __init__(
+        self,
+        path: str | Path | None = None,
+        max_episodic_per_session: int = 100,
+        vector_backend: VectorMemoryBackend | None = None,
+    ) -> None:
         self.path = Path(path) if path else None
         self.max_episodic_per_session = max_episodic_per_session
+        self.vector_backend = vector_backend or LocalVectorBackend()
         self._lock = threading.RLock()
         self._records: list[MemoryRecord] = []
         self._load()
+        self._rehydrate_vector_backend()
 
     @property
     def records(self) -> list[MemoryRecord]:
@@ -93,6 +102,16 @@ class MemoryStore:
         except (OSError, json.JSONDecodeError, KeyError, TypeError, ValueError):
             # A corrupt optional cache must not prevent the API from starting.
             self._records = []
+
+    def _rehydrate_vector_backend(self) -> None:
+        for record in self._records:
+            if record.kind == "semantic":
+                self.vector_backend.upsert(
+                    memory_id=record.id,
+                    content=record.content,
+                    user_id=record.user_id,
+                    metadata=record.metadata,
+                )
 
     def _persist(self) -> None:
         if self.path is None:
@@ -135,6 +154,13 @@ class MemoryStore:
                 duplicate.importance = max(duplicate.importance, importance)
                 duplicate.accessed_at = _now()
                 duplicate.metadata.update(metadata or {})
+                if duplicate.kind == "semantic":
+                    self.vector_backend.upsert(
+                        memory_id=duplicate.id,
+                        content=duplicate.content,
+                        user_id=duplicate.user_id,
+                        metadata=duplicate.metadata,
+                    )
                 self._persist()
                 return duplicate
 
@@ -148,6 +174,13 @@ class MemoryStore:
                 metadata=metadata or {},
             )
             self._records.append(record)
+            if record.kind == "semantic":
+                self.vector_backend.upsert(
+                    memory_id=record.id,
+                    content=record.content,
+                    user_id=record.user_id,
+                    metadata=record.metadata,
+                )
             self._trim_episodic(user_id=user_id, session_id=session_id)
             self._persist()
             return record
@@ -182,13 +215,21 @@ class MemoryStore:
                 item for item in self._records
                 if item.user_id == user_id and (allowed is None or item.kind in allowed)
             ]
+            vector_ids = set()
+            if self.vector_backend and (allowed is None or "semantic" in allowed):
+                try:
+                    vector_ids = set(self.vector_backend.search(query=query, user_id=user_id, limit=limit * 3))
+                except Exception:
+                    # External vector store outages must degrade to local retrieval.
+                    vector_ids = set()
             scored: list[tuple[float, MemoryRecord]] = []
             for item in candidates:
                 item_tokens = _tokens(item.content)
                 overlap = len(query_tokens & item_tokens) / max(1, len(query_tokens))
                 same_session = 0.12 if session_id and item.session_id == session_id else 0.0
                 kind_boost = 0.08 if item.kind == "semantic" else 0.0
-                score = overlap * 0.68 + item.importance * 0.20 + same_session + kind_boost
+                vector_boost = 0.22 if item.id in vector_ids else 0.0
+                score = overlap * 0.68 + item.importance * 0.20 + same_session + kind_boost + vector_boost
                 if not query_tokens:
                     score = item.importance * 0.45 + same_session + kind_boost
                 if score > 0 or not query_tokens:

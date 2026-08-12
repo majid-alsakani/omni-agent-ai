@@ -1,0 +1,34 @@
+graph TD
+    User([User Prompt]) --> LoadContext[Load Context: Memory & Knowledge]
+    
+    subgraph Memory [Sovereign Memory System]
+        direction LR
+        MemEpisodic[(Episodic Memory: JSON)]
+        MemSemantic[(Semantic Memory: Vector DB / pgvector)]
+    end
+    
+    LoadContext -.->|Read| Memory
+    
+    subgraph MultiAgentBrain [Autonomous Multi-Agent Orchestrator]
+        LoadContext --> Orchestrator{Orchestrator: Self-Planning}
+        
+        Orchestrator -->|Task 1| Researcher[Researcher Agent]
+        Orchestrator -->|Task 2| Analyst[Analyst Agent]
+        Orchestrator -->|Task 3| RiskManager[Risk Agent]
+        
+        Researcher --> Reviewer{Reviewer: Consistency Check}
+        Analyst --> Reviewer
+        RiskManager --> Reviewer
+        
+        Reviewer -->|Need Revision| Orchestrator
+    end
+    
+    Reviewer -->|Approved| Synthesizer[Synthesizer: Answer Merging]
+    Synthesizer --> Finalizer[Finalizer: Memory Persistence]
+    Finalizer -.->|Write| Memory
+    Finalizer --> Output([Final Multi-Agent Result])
+
+    style MultiAgentBrain fill:#f0f,stroke:#333,stroke-width:2px
+    style Memory fill:#bbf,stroke:#333,stroke-width:2px
+    style User fill:#dfd
+    style Output fill:#dfd
