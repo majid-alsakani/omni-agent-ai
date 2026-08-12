@@ -14,6 +14,7 @@ from langgraph.graph import END, START, StateGraph
 from typing_extensions import TypedDict
 
 from .memory import MemoryStore
+from .tools import ToolRegistry
 
 
 class MultiAgentState(TypedDict, total=False):
@@ -71,6 +72,7 @@ class MultiAgentEngine:
 
     def __init__(self, memory: MemoryStore) -> None:
         self.memory = memory
+        self.tools = ToolRegistry(memory)
         self.specialists: dict[str, Specialist] = {
             "researcher": LocalSpecialist("Research Agent", "جمع الحقائق والأسئلة المفتوحة"),
             "analyst": LocalSpecialist("Analysis Agent", "تحويل الهدف إلى خطة ومؤشرات"),
@@ -119,12 +121,27 @@ class MultiAgentEngine:
             {"id": "analysis", "role": "analyst", "instruction": "حدد الخطة ومؤشرات النجاح."},
             {"id": "risk", "role": "risk_manager", "instruction": "افحص المخاطر والضوابط."},
         ]
-        return {"objective": objective, "tasks": tasks, "agent_outputs": []}
+        validation = self.tools.call("plan_validator", objective=objective, tasks=tasks)
+        return {
+            "objective": objective,
+            "tasks": tasks,
+            "agent_outputs": [],
+            "review": {"plan_validation": validation.data, "plan_status": validation.status},
+        }
 
     def _worker(self, role: str):
         def run(state: MultiAgentState) -> dict[str, Any]:
             task = next(item for item in state["tasks"] if item["role"] == role)
             output = self.specialists[role].run(state["objective"], state["context"], task)
+            memory_trace = self.tools.call(
+                "memory_lookup",
+                query=state["objective"],
+                user_id=state["user_id"],
+                session_id=state["session_id"],
+            )
+            output["tool_trace"] = {
+                "memory_lookup": {"status": memory_trace.status, "matches": len(memory_trace.data["matches"])}
+            }
             return {"agent_outputs": [output]}
 
         return run
@@ -145,16 +162,19 @@ class MultiAgentEngine:
 
     def _synthesizer(self, state: MultiAgentState) -> dict[str, Any]:
         outputs = state.get("agent_outputs", [])
+        gate = self.tools.call("risk_gate", action="synthesize_multi_agent_answer", external_side_effect=False)
         sections = []
         for output in outputs:
             sections.append(
                 f"### {output['agent']}\n{output['finding']}\n"
-                f"الأدلة/النقاط: {', '.join(output['evidence'])}"
+                f"الأدلة/النقاط: {', '.join(output['evidence'])}\n"
+                f"سجل الأدوات: {output.get('tool_trace', {})}"
             )
         answer = (
             f"النتيجة الموحدة للمهمة متعددة الوكلاء: {state['objective']}\n\n"
             + "\n\n".join(sections)
             + "\n\n### قرار المنسق\nتم دمج نتائج الوكلاء الثلاثة بعد المراجعة. "
+            f"بوابة المخاطر: {gate.status}. "
             "لا تُنفذ أي عملية خارجية قبل إضافة أداة موثوقة وصلاحية وتأكيد بشري."
         )
         self.memory.add(

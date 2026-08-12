@@ -1,0 +1,1 @@
+{"status":"ok","memory_records":11,"engines":["langgraph-single","langgraph-multi-agent"],"vector_store":"local-hashed-vector"}

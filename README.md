@@ -80,6 +80,14 @@ curl -X POST http://127.0.0.1:8000/ask \
   }'
 ```
 
+لرؤية الأدوات المسموح بها:
+
+```bash
+curl http://127.0.0.1:8000/tools
+```
+
+تتطلب الأدوات ذات الآثار الخارجية موافقة بشرية صريحة؛ النسخة الحالية لا تدّعي إرسال بريد أو تعديل نظام خارجي دون موصل وأداة وصلاحيات حقيقية.
+
 ---
 
 ## 📂 هيكلية المشروع المحدثة
@@ -88,6 +96,9 @@ curl -X POST http://127.0.0.1:8000/ask \
 *   `backend/agent_engine.py`: محرك الوكيل الفردي السريع.
 *   `backend/memory.py`: مدير الذاكرة الهجين (Hybrid Memory Manager).
 *   `docs/vector-memory-setup.md`: دليل ربط قواعد البيانات الخارجية.
+*   `docs/cloud_deployment_guide.md`: نشر PostgreSQL/pgvector على السحابة.
+*   `docs/advanced_scenarios.md`: سيناريوهات الأتمتة الاستراتيجية والتقنية.
+*   `backend/tools.py`: أدوات allowlisted مع بوابة موافقة بشرية.
 
 ---
 

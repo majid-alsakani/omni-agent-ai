@@ -104,6 +104,15 @@ async def multi_ask_agent(query: Query) -> dict[str, object]:
         raise HTTPException(status_code=500, detail="Multi-agent execution failed") from exc
 
 
+@app.get("/tools")
+async def list_tools() -> dict[str, object]:
+    return {
+        "count": len(multi_engine.tools.names),
+        "tools": multi_engine.tools.names,
+        "policy": "Allowlisted tools only; external side effects require human approval.",
+    }
+
+
 @app.get("/memory")
 async def get_memory(user_id: str = "default_user", session_id: str | None = None) -> dict[str, object]:
     records = store.recent(user_id=user_id, session_id=session_id, limit=50)

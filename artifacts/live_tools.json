@@ -1,0 +1,1 @@
+{"count":3,"tools":["memory_lookup","plan_validator","risk_gate"],"policy":"Allowlisted tools only; external side effects require human approval."}

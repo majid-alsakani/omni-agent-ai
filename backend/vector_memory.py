@@ -7,6 +7,7 @@ stores tenant/user metadata to keep memories isolated.
 
 from __future__ import annotations
 
+import hashlib
 import math
 import re
 from dataclasses import dataclass
@@ -24,7 +25,8 @@ def _embedding(text: str, dimensions: int = 64) -> list[float]:
     """
     vector = [0.0] * dimensions
     for token in _TOKEN_RE.findall(text.casefold()):
-        index = hash(token) % dimensions
+        digest = hashlib.sha256(token.encode("utf-8")).digest()
+        index = int.from_bytes(digest[:8], "big") % dimensions
         vector[index] += 1.0
     norm = math.sqrt(sum(value * value for value in vector)) or 1.0
     return [value / norm for value in vector]
