@@ -1,10 +1,26 @@
-# Omni-Agent AI
+# 💎 Omni-Agent AI
+
+<p align="center">
+  <img src="artifacts/omni_logo.png" width="200" alt="Omni-Agent Logo">
+</p>
 
 <p align="center">
   <img src="https://img.shields.io/badge/Status-Working%20Core-16a34a?style=for-the-badge" alt="Working core">
   <img src="https://img.shields.io/badge/Orchestration-LangGraph-7c3aed?style=for-the-badge" alt="LangGraph">
   <img src="https://img.shields.io/badge/Tests-8%20passed-0f766e?style=for-the-badge" alt="Tests passed">
 </p>
+
+---
+
+## 🎨 Visual Identity & Dashboard Mockup
+
+<p align="center">
+  <img src="artifacts/dashboard_mockup.png" width="800" alt="Omni-Agent Dashboard Mockup">
+  <br>
+  <i>Conceptual Dashboard: LangGraph Execution, 3D Knowledge Graph, and Real-time Memory Logs.</i>
+</p>
+
+---
 
 **Omni-Agent AI** هو نواة وكيل ذكي قابلة للتوسع، مبنية لتنفذ المهمة على مراحل واضحة بدلاً من إرجاع رد عشوائي من استدعاء واحد للنموذج. النواة الحالية تفصل بين **التخطيط، التنفيذ، المراجعة، والذاكرة**، وتحتوي على اختبارات قابلة لإعادة التشغيل.
 
@@ -55,25 +71,13 @@ docker build -t omni-agent-ai .
 docker run --rm -p 8000:8000 omni-agent-ai
 ```
 
-## بنية الوكيل
+## 🏗️ Architecture & Agentic Workflow
 
-يمر الطلب عبر الرسم التالي:
+<p align="center">
+  <img src="artifacts/architecture.png" width="600" alt="Omni-Agent Architecture">
+</p>
 
-```text
-START
-  ↓
-Load Context → Planner → Executor ──┐
-                       ↑            │
-                       └────────────┘
-                                    ↓ عند اكتمال الخطة
-                                 Reviewer
-                                    ↓
-                     Revise ────── أو ────── Finish
-                                                  ↓
-                                               Finalizer
-                                                  ↓
-                                                  END
-```
+The system follows a sophisticated **PRAR (Perception, Reasoning, Action, Reflection)** loop managed by LangGraph. It ensures every task is planned, executed, and reviewed before delivery, while maintaining a persistent dual-process memory.
 
 يتم حفظ طلب المستخدم ونتيجة الوكيل كذاكرة عرضية. إذا احتوى الطلب على صيغة صريحة مثل «تذكر» أو «أفضل»، تتم ترقيته إلى ذاكرة دلالية. هذا يمنع الوكيل من تحويل كل كلام عابر إلى حقيقة دائمة.
 

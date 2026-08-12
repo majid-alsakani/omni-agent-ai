@@ -1,0 +1,30 @@
+graph TD
+    User([User Prompt]) --> LoadContext[Load Context: Memory Loader]
+    
+    subgraph Brain [Omni-Agent Brain]
+        LoadContext --> Planner{Planner: Plan-and-Execute}
+        Planner -->|Generate Plan| Executor[Executor Loop]
+        Executor -->|Action| Tools[External Tools / Data]
+        Tools -->|Observation| Executor
+        Executor -->|Step Completed| Reviewer{Reviewer: Self-Critique}
+        Reviewer -->|Need Revision| Planner
+    end
+    
+    subgraph Memory [Dual-Process Memory]
+        MemEpisodic[(Episodic Memory: Recent Events)]
+        MemSemantic[(Semantic Memory: Facts & Preferences)]
+        
+        LoadContext -.->|Read| MemEpisodic
+        LoadContext -.->|Read| MemSemantic
+        
+        Finalizer -.->|Write| MemEpisodic
+        Finalizer -.->|Write| MemSemantic
+    end
+    
+    Reviewer -->|Approved| Finalizer[Finalizer: Memory Updater]
+    Finalizer --> Output([Final Answer])
+
+    style Brain fill:#f9f,stroke:#333,stroke-width:2px
+    style Memory fill:#bbf,stroke:#333,stroke-width:2px
+    style User fill:#dfd
+    style Output fill:#dfd
