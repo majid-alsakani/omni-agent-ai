@@ -1,5 +1,3 @@
-# Build from the repository root:
-# docker build -f backend/Dockerfile .
 FROM python:3.12-slim
 
 WORKDIR /app
@@ -8,6 +6,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 
 COPY backend/requirements.txt /app/requirements.txt
 RUN pip install --no-cache-dir -r /app/requirements.txt
+
 COPY backend /app/backend
 RUN mkdir -p /app/data
 

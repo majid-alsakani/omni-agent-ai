@@ -1,70 +1,86 @@
-# 💎 Omni-Agent: The Autonomous Business Intelligence Hub
+# Omni-Agent AI
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-2.0.0--Alpha-blueviolet?style=for-the-badge&logo=rocket" alt="Project Version">
-  <img src="https://img.shields.io/badge/Powered%20By-LangGraph-orange?style=for-the-badge&logo=python" alt="Powered By">
-  <img src="https://img.shields.io/github/stars/majid-alsakani/omni-agent-ai?style=for-the-badge&color=gold" alt="GitHub Stars">
+  <img src="https://img.shields.io/badge/Status-Working%20Core-16a34a?style=for-the-badge" alt="Working core">
+  <img src="https://img.shields.io/badge/Orchestration-LangGraph-7c3aed?style=for-the-badge" alt="LangGraph">
+  <img src="https://img.shields.io/badge/Tests-8%20passed-0f766e?style=for-the-badge" alt="Tests passed">
 </p>
 
-## ✨ The Vision: Intelligence Beyond Automation
-**Omni-Agent** is not just another chatbot; it is a sophisticated **Multi-Agent Orchestration System** designed to act as a digital "Chief of Staff" for modern businesses. By leveraging state-of-the-art **Graph-based AI Workflows**, it moves from simple command-response to autonomous planning, execution, and self-correction.
+**Omni-Agent AI** هو نواة وكيل ذكي قابلة للتوسع، مبنية لتنفذ المهمة على مراحل واضحة بدلاً من إرجاع رد عشوائي من استدعاء واحد للنموذج. النواة الحالية تفصل بين **التخطيط، التنفيذ، المراجعة، والذاكرة**، وتحتوي على اختبارات قابلة لإعادة التشغيل.
 
-> "The future of business isn't about having better tools, it's about having smarter agents that know how to use them."
+> النسخة الحالية هي **Working Core** محلية ومختبرة. لا تدّعي تنفيذ إجراءات خارجية مثل إرسال بريد أو تعديل نظام خارجي ما لم تتم إضافة أداة وموصل موثوق لذلك الإجراء.
 
----
+## ما تم تطويره فعلياً
 
-## 🚀 Key "Wow" Features
+| الجزء | التنفيذ الحالي | الفائدة |
+| --- | --- | --- |
+| محرك الوكيل | LangGraph StateGraph | مسار واضح وقابل للتتبع من استقبال الطلب حتى النتيجة |
+| التخطيط | LocalReasoningProvider قابل للاستبدال | إنشاء خطة متعددة الخطوات قابلة للاختبار |
+| التنفيذ | Executor مستقل لكل خطوة | منع الخلط بين التفكير والتنفيذ وتسجيل النتائج |
+| المراجعة | Reviewer مع إعادة محاولة محدودة | اكتشاف النتيجة الفارغة أو غير المكتملة قبل التسليم |
+| الذاكرة العرضية | أحداث الجلسة مع حد أقصى واستمرارية JSON | استمرار سياق المستخدم دون تضخم لا نهائي |
+| الذاكرة الدلالية | حقائق وتفضيلات صريحة مع استرجاع هجين بسيط | تذكر المعلومات المهمة دون حفظ كل شيء عشوائياً |
+| API | FastAPI: `/health`, `/ask`, `/memory` | تشغيل النواة من تطبيق أو واجهة مستقبلية |
+| الاختبار | 8 اختبارات للذاكرة، الرسم البياني، وAPI | اكتشاف الانحدار قبل النشر |
 
-| Feature | Description | Tech Stack |
-| :--- | :--- | :--- |
-| **🧠 Graph-Based Brain** | Uses **LangGraph** for complex, non-linear reasoning and long-term task planning. | Python, LangGraph |
-| **🎨 Generative UI** | A dynamic dashboard that evolves its interface based on the agent's current task. | Next.js, Framer Motion |
-| **🌐 Omni-Connectivity** | Deep integration with Slack, WhatsApp, and Google Workspace for real-time action. | FastAPI, Webhooks |
-| **📊 3D Knowledge Graph** | Visualize how the AI thinks and connects data points in an immersive 3D space. | Three.js, React Fiber |
-| **🔒 Enterprise Vault** | Bank-grade security with OAuth2 and encrypted vector memory. | PostgreSQL, Redis |
-
----
-
-## 🏗️ Smart Architecture
-
-Our system is built on a **Micro-Agent Architecture** where specialized agents collaborate:
-
-1.  **The Planner:** Breaks down complex goals into executable steps.
-2.  **The Researcher:** Scours APIs and web data for real-time information.
-3.  **The Analyst:** Processes data and generates predictive insights.
-4.  **The Executor:** Interacts with external tools (sending emails, updating sheets).
-
----
-
-## 🛠️ Getting Started (Next-Gen Edition)
+## التشغيل المحلي
 
 ```bash
-# Clone the future
-git clone https://github.com/majid-alsakani/omni-agent-ai.git
-
-# Setup Backend
-cd backend
-pip install -r requirements.txt
-python main.py
-
-# Launch Dashboard
-cd ../frontend
-npm install
-npm run dev
+cd omni-agent-ai
+pip install -r backend/requirements.txt
+pytest -q
+uvicorn backend.main:app --reload --port 8000
 ```
 
----
+بعد التشغيل، يمكن فحص الجاهزية عبر:
 
-## 📬 Connect & Collaborate
+```bash
+curl http://127.0.0.1:8000/health
+```
 
--   **Founder:** [Majid Al-Sakani](https://github.com/majid-alsakani)
--   **Email:** [majidalsakani@gmail.com](mailto:majidalsakani@gmail.com)
--   **LinkedIn:** [Majid Al-Sakani](https://www.linkedin.com/in/majid-alsakani)
+وإرسال مهمة:
 
----
+```bash
+curl -X POST http://127.0.0.1:8000/ask \
+  -H 'Content-Type: application/json' \
+  -d '{"prompt":"حلل أداء المبيعات","user_id":"u1","session_id":"s1"}'
+```
 
-<p align="center">
-  <img src="https://capsule-render.vercel.app/api?type=waving&color=auto&height=120&section=header&text=OMNI-AGENT%20AI&fontSize=50" />
-</p>
+يُحفظ التخزين المحلي في `data/memory.json`. هذا مناسب للنموذج الأولي والاختبار؛ أما الإنتاج فيحتاج إلى PostgreSQL أو Redis مع فهرس متجهي وطبقة صلاحيات ونسخ احتياطي.
 
-✨ _Omni-Agent: Empowering businesses with intelligent, autonomous orchestration._ ✨
+## التشغيل عبر Docker
+
+```bash
+docker build -t omni-agent-ai .
+docker run --rm -p 8000:8000 omni-agent-ai
+```
+
+## بنية الوكيل
+
+يمر الطلب عبر الرسم التالي:
+
+```text
+START
+  ↓
+Load Context → Planner → Executor ──┐
+                       ↑            │
+                       └────────────┘
+                                    ↓ عند اكتمال الخطة
+                                 Reviewer
+                                    ↓
+                     Revise ────── أو ────── Finish
+                                                  ↓
+                                               Finalizer
+                                                  ↓
+                                                  END
+```
+
+يتم حفظ طلب المستخدم ونتيجة الوكيل كذاكرة عرضية. إذا احتوى الطلب على صيغة صريحة مثل «تذكر» أو «أفضل»، تتم ترقيته إلى ذاكرة دلالية. هذا يمنع الوكيل من تحويل كل كلام عابر إلى حقيقة دائمة.
+
+## الخطوة التالية للإنتاج
+
+المحرك مصمم بواجهة `ReasoningProvider`. لذلك يمكن إضافة مزود LLM حقيقي لاحقاً باستخدام مخرجات منظمة JSON، مع إبقاء LangGraph والاختبارات والذاكرة كما هي. قبل السماح لأي أداة بتنفيذ تغيير خارجي يجب إضافة صلاحيات، وضع معاينة، تأكيد بشري، مهلة زمنية، وسجل تدقيق.
+
+## الترخيص
+
+MIT

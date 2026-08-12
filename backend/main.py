@@ -1,92 +1,63 @@
+"""FastAPI entrypoint for Omni-Agent."""
+
+from __future__ import annotations
+
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
-from typing import List, Optional, Dict, Any
-import uvicorn
-from langgraph.graph import StateGraph, END
-from typing_extensions import TypedDict
+from pydantic import BaseModel, Field
 
-# --- State Definition ---
-class AgentState(TypedDict):
-    input: str
-    plan: List[str]
-    current_step: int
-    results: Dict[str, Any]
-    final_answer: str
+from .agent_engine import AgentEngine
+from .memory import MemoryStore
 
-# --- API Setup ---
-app = FastAPI(title="Omni-Agent AI Backend", version="1.0.0")
 
-class Query(BaseModel):
-    prompt: str
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+MEMORY_PATH = PROJECT_ROOT / "data" / "memory.json"
+store = MemoryStore(MEMORY_PATH)
+engine = AgentEngine(store)
 
-# --- Integrated Memory & Reasoning ---
-from memory_schema import OmniMemorySystem
-
-memory = OmniMemorySystem(user_id="default_user", session_id="session_001")
-
-def planner(state: AgentState):
-    """الوكيل المخطط: يستخدم الذاكرة لرسم خطة دقيقة"""
-    context = memory.get_context(state['input'])
-    print(f"Planning with Context: {context}")
-    # محاكاة التخطيط الذكي بناءً على السياق
-    plan = ["تحليل سياق الطلب", "استرجاع المعلومات من الذاكرة الدلالية", "توليد الإجابة النهائية"]
-    return {"plan": plan, "current_step": 0}
-
-def executor(state: AgentState):
-    """الوكيل المنفذ: ينفذ الخطوات ويحدث الذاكرة العرضية"""
-    step = state['plan'][state['current_step']]
-    print(f"Executing: {step}")
-    
-    # محاكاة العمل وتحديث الذاكرة
-    result = f"النتيجة لـ {step}"
-    memory.episodic.add_event(f"نفذت الخطوة: {step} بنجاح.")
-    
-    state['results'][step] = result
-    return {"results": state['results'], "current_step": state['current_step'] + 1}
-
-def should_continue(state: AgentState):
-    """تحديد ما إذا كان العمل قد انتهى"""
-    if state['current_step'] >= len(state['plan']):
-        return "end"
-    return "continue"
-
-# --- Build the Graph ---
-workflow = StateGraph(AgentState)
-workflow.add_node("planner", planner)
-workflow.add_node("executor", executor)
-
-workflow.set_entry_point("planner")
-workflow.add_edge("planner", "executor")
-workflow.add_conditional_edges(
-    "executor",
-    should_continue,
-    {
-        "continue": "executor",
-        "end": END
-    }
+app = FastAPI(
+    title="Omni-Agent AI",
+    version="2.1.0",
+    description="A testable LangGraph agent with persistent episodic and semantic memory.",
 )
 
-agent_app = workflow.compile()
+
+class Query(BaseModel):
+    prompt: str = Field(min_length=1, max_length=10_000)
+    user_id: str = Field(default="default_user", min_length=1, max_length=128)
+    session_id: str = Field(default="default_session", min_length=1, max_length=128)
+
 
 @app.get("/")
-async def root():
-    return {"message": "Welcome to Omni-Agent AI Hub"}
+async def root() -> dict[str, str]:
+    return {"name": "Omni-Agent AI", "status": "ready", "version": app.version}
+
+
+@app.get("/health")
+async def health() -> dict[str, object]:
+    return {"status": "ok", "memory_records": len(store.records), "engine": "langgraph"}
+
 
 @app.post("/ask")
-async def ask_agent(query: Query):
+async def ask_agent(query: Query) -> dict[str, object]:
     try:
-        initial_state = {
-            "input": query.prompt,
-            "plan": [],
-            "current_step": 0,
-            "results": {},
-            "final_answer": ""
-        }
-        # تنفيذ الرسم البياني للوكلاء
-        final_state = agent_app.invoke(initial_state)
-        return {"status": "success", "data": final_state}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        result = engine.run(
+            query.prompt,
+            user_id=query.user_id,
+            session_id=query.session_id,
+        )
+        return {"status": "success", "data": result}
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Agent execution failed") from exc
 
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+@app.get("/memory")
+async def get_memory(user_id: str = "default_user", session_id: str | None = None) -> dict[str, object]:
+    records = store.recent(user_id=user_id, session_id=session_id, limit=50)
+    return {
+        "count": len(records),
+        "items": [record.to_dict() for record in records],
+    }
