@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#090b18" />
+    <title>Omni-Agent Command Center</title>
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <div class="app-shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <div class="brand-mark"><span></span><span></span><span></span></div>
+          <div>
+            <strong>Omni-Agent</strong>
+            <small>Command Center</small>
+          </div>
+        </div>
+
+        <nav aria-label="Navigation">
+          <a class="nav-item active" href="#mission">مركز المهام</a>
+          <a class="nav-item" href="#agents">تنسيق الوكلاء</a>
+          <a class="nav-item" href="#memory">الذاكرة السيادية</a>
+          <a class="nav-item" href="#tools">الضوابط والأدوات</a>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="mini-health"><span class="pulse"></span><span id="sidebar-health">جاري الاتصال...</span></div>
+          <p>لا تُنفذ إجراءات خارجية دون أداة موثوقة وموافقة بشرية.</p>
+        </div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">نظام تخطيط ذاتي متعدد الوكلاء</p>
+            <h1>حوّل كل هدف إلى خطة يمكن تنفيذها ومراجعتها.</h1>
+          </div>
+          <div class="environment">
+            <span class="status-dot" id="header-dot"></span>
+            <span id="environment-label">جاري التحقق من النظام</span>
+          </div>
+        </header>
+
+        <section class="metrics" aria-label="System metrics">
+          <article class="metric-card">
+            <span>حالة المحرك</span>
+            <strong id="metric-status">—</strong>
+            <small id="metric-engines">في انتظار الاتصال</small>
+          </article>
+          <article class="metric-card">
+            <span>الذاكرة</span>
+            <strong id="metric-memory">—</strong>
+            <small>سجل ذاكرة محفوظ</small>
+          </article>
+          <article class="metric-card">
+            <span>Vector Store</span>
+            <strong id="metric-vector">—</strong>
+            <small>استرجاع المعرفة الدلالية</small>
+          </article>
+          <article class="metric-card">
+            <span>الأدوات الآمنة</span>
+            <strong id="metric-tools">—</strong>
+            <small>قائمة أدوات مسموحة</small>
+          </article>
+        </section>
+
+        <section id="mission" class="mission-grid">
+          <article class="panel mission-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">ابدأ مهمة</p>
+                <h2>ماذا تريد من Omni-Agent أن ينجز؟</h2>
+              </div>
+              <span class="mode-chip" id="selected-mode-label">AUTO</span>
+            </div>
+
+            <label for="prompt">وصف المهمة</label>
+            <textarea id="prompt" rows="6" maxlength="10000" placeholder="مثال: صمم خطة إطلاق منتج جديد، اجمع محاور البحث، حلل البدائل، وافحص المخاطر قبل اعتماد القرار."></textarea>
+
+            <div class="mission-options">
+              <div class="field-group">
+                <label for="mode">نمط التشغيل</label>
+                <select id="mode">
+                  <option value="auto">Auto — يختار النظام المسار المناسب</option>
+                  <option value="multi">Multi-Agent — بحث وتحليل ومخاطر</option>
+                  <option value="single">Single Agent — مهام سريعة ومركزة</option>
+                </select>
+              </div>
+              <div class="field-group compact">
+                <label for="user-id">هوية المستخدم</label>
+                <input id="user-id" value="command-center-user" maxlength="128" />
+              </div>
+            </div>
+
+            <div class="scenario-row" aria-label="Quick scenarios">
+              <button class="scenario" data-prompt="ضع خطة لتقييم فرصة سوق جديدة: اجمع محاور البحث، حلل المنافسين، حدد مؤشرات النجاح، وافحص مخاطر التنفيذ.">تحليل فرصة سوق</button>
+              <button class="scenario" data-prompt="أنشئ خطة استجابة لحادث تقني: حدد السبب المحتمل، خطوات العزل، نقاط التحقق، والمخاطر قبل أي إجراء.">استجابة لحادث</button>
+              <button class="scenario" data-prompt="تذكر أنني أفضل تقارير مختصرة جداً باللغة العربية.">احفظ تفضيلاً</button>
+            </div>
+
+            <div class="action-row">
+              <button id="run-mission" class="primary-button"><span>تشغيل المهمة</span><i>↗</i></button>
+              <span class="request-status" id="request-status">جاهز لاستقبال المهمة</span>
+            </div>
+          </article>
+
+          <article id="agents" class="panel orchestration-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">حالة التنفيذ</p>
+                <h2>تنسيق الوكلاء</h2>
+              </div>
+              <span class="live-indicator"><i></i> LIVE</span>
+            </div>
+            <div class="orchestration-graph" id="orchestration-graph">
+              <div class="graph-core">ORCHESTRATOR</div>
+              <div class="agent-node research"><span>01</span><strong>Research</strong><small>استكشاف</small></div>
+              <div class="agent-node analyst"><span>02</span><strong>Analysis</strong><small>تحليل</small></div>
+              <div class="agent-node risk"><span>03</span><strong>Risk</strong><small>ضوابط</small></div>
+              <div class="review-node"><strong>Review Gate</strong><small id="review-state">في انتظار مهمة</small></div>
+            </div>
+            <div class="agent-legend"><span><i class="research-dot"></i> بحث</span><span><i class="analyst-dot"></i> تحليل</span><span><i class="risk-dot"></i> مخاطر</span></div>
+          </article>
+        </section>
+
+        <section class="results-grid">
+          <article class="panel result-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">المخرجات</p>
+                <h2>النتيجة والقرار</h2>
+              </div>
+              <button id="copy-result" class="quiet-button" disabled>نسخ النتيجة</button>
+            </div>
+            <div id="result-content" class="empty-state">
+              <div class="empty-orb"></div>
+              <h3>نتيجة المهمة ستظهر هنا</h3>
+              <p>شغّل مهمة لرؤية الخطة، مساهمات الوكلاء، ونتيجة المراجعة في مكان واحد.</p>
+            </div>
+          </article>
+
+          <article id="memory" class="panel memory-panel">
+            <div class="panel-heading">
+              <div>
+                <p class="eyebrow">سياق مستمر</p>
+                <h2>آخر الذاكرة</h2>
+              </div>
+              <button id="refresh-memory" class="quiet-button">تحديث</button>
+            </div>
+            <div id="memory-list" class="memory-list"><p class="muted">جاري تحميل ذاكرة المستخدم...</p></div>
+          </article>
+        </section>
+
+        <section id="tools" class="tools-strip panel">
+          <div>
+            <p class="eyebrow">تنفيذ مسؤول</p>
+            <h2>الأدوات المسموح بها والضوابط</h2>
+          </div>
+          <div id="tool-list" class="tool-list"></div>
+        </section>
+      </main>
+    </div>
+    <script src="/static/app.js"></script>
+  </body>
+</html>

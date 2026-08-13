@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .agent_engine import AgentEngine
@@ -17,6 +19,7 @@ from .vector_memory import LocalVectorBackend, PostgresVectorBackend, VectorMemo
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MEMORY_PATH = PROJECT_ROOT / "data" / "memory.json"
+STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
 def _build_vector_backend() -> tuple[VectorMemoryBackend, str]:
@@ -41,9 +44,10 @@ multi_engine = MultiAgentEngine(store)
 
 app = FastAPI(
     title="Omni-Agent AI",
-    version="3.0.0",
+    version="3.1.0",
     description="A testable LangGraph single-agent and self-planning multi-agent system with persistent memory.",
 )
+app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 
 class Query(BaseModel):
@@ -62,8 +66,14 @@ def _is_complex(prompt: str) -> bool:
     return len(prompt.split()) >= 12 or any(signal in lower for signal in signals)
 
 
-@app.get("/")
-async def root() -> dict[str, str]:
+@app.get("/", include_in_schema=False)
+async def command_center() -> FileResponse:
+    """Serve the interactive product dashboard."""
+    return FileResponse(STATIC_DIR / "index.html")
+
+
+@app.get("/api")
+async def api_info() -> dict[str, str]:
     return {"name": "Omni-Agent AI", "status": "ready", "version": app.version}
 
 

@@ -8,10 +8,27 @@
   <img src="https://img.shields.io/badge/Status-Autonomous%20Multi--Agent-16a34a?style=for-the-badge" alt="Multi-Agent">
   <img src="https://img.shields.io/badge/Orchestration-LangGraph-7c3aed?style=for-the-badge" alt="LangGraph">
   <img src="https://img.shields.io/badge/Memory-Vector%20DB%20Ready-0284c7?style=for-the-badge" alt="Vector Memory">
-  <img src="https://img.shields.io/badge/Tests-11%20passed-0f766e?style=for-the-badge" alt="Tests passed">
+  <img src="https://img.shields.io/badge/Tests-13%20passed-0f766e?style=for-the-badge" alt="Tests passed">
 </p>
 
 ---
+
+## ⚡ Command Center: المنتج الحقيقي
+
+لم يعد المشروع مجرد API أو صور تصورية. أضيفت لوحة تحكم تفاعلية حقيقية تُخدَم من المسار `/` وتعمل مباشرة مع محرك LangGraph. يمكن للمستخدم إدخال مهمة، اختيار نمط التشغيل، مشاهدة وكلاء البحث والتحليل والمخاطر، قراءة النتيجة الموحدة، ومراجعة ذاكرة الجلسة والأدوات المسموح بها.
+
+<p align="center">
+  <img src="artifacts/command_center_live.webp" width="850" alt="Omni-Agent Command Center running live">
+  <br>
+  <i>واجهة Command Center متصلة بمحرك Omni-Agent الحقيقي وليست صورة واجهة فقط.</i>
+</p>
+
+| ما يراه المستخدم | القيمة العملية |
+| --- | --- |
+| اختيار Auto أو Single أو Multi-Agent | تحويل المهمة البسيطة أو المعقدة إلى مسار تشغيل مناسب دون إعدادات تقنية معقدة |
+| مخطط الوكلاء وحالة المراجعة | شفافية: يظهر من شارك في المهمة وهل تمت الموافقة على المخرجات |
+| لوحة الذاكرة | يوضح ما يتذكره النظام في الجلسة والبيانات الدلالية ذات الصلة |
+| سجل الأدوات | يوضح أن التنفيذ مقيد بأدوات مسموحة وبوابة تأكيد للأفعال الخارجية |
 
 ## 🎨 The Multi-Agent Evolution & Sovereign Memory
 
@@ -65,10 +82,12 @@ pip install -r backend/requirements-vector.txt
 pytest -v
 ```
 
-### 3. تشغيل النظام
+### 3. تشغيل النظام والواجهة
 ```bash
 uvicorn backend.main:app --reload --port 8000
 ```
+
+افتح بعدها [http://127.0.0.1:8000](http://127.0.0.1:8000) للوصول إلى **Command Center**، أو [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) لاستكشاف API.
 
 ### 4. تجربة مهمة معقدة (Multi-Agent)
 ```bash
@@ -99,6 +118,10 @@ curl http://127.0.0.1:8000/tools
 *   `docs/cloud_deployment_guide.md`: نشر PostgreSQL/pgvector على السحابة.
 *   `docs/advanced_scenarios.md`: سيناريوهات الأتمتة الاستراتيجية والتقنية.
 *   `backend/tools.py`: أدوات allowlisted مع بوابة موافقة بشرية.
+*   `backend/static/`: لوحة Command Center التفاعلية (HTML/CSS/JavaScript) المرتبطة بالـ API الحقيقي.
+*   `docs/command_center_design.md`: مبررات تصميم المنتج وتدفق تجربة المستخدم.
+*   `docs/command_center_user_guide.md`: دليل استخدام عملي للمهام الفردية ومتعددة الوكلاء.
+*   `artifacts/command_center_validation.md`: توثيق اختبار المتصفح الحي للواجهة.
 
 ---
 
