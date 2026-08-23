@@ -23,4 +23,4 @@ def test_command_center_and_api_info_are_served(tmp_path, monkeypatch):
 
     info = client.get("/api")
     assert info.status_code == 200
-    assert info.json()["version"] == "3.1.0"
+    assert info.json()["version"] == "3.2.0"

@@ -6,12 +6,13 @@ import os
 from pathlib import Path
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
 from .agent_engine import AgentEngine
+from .data_analysis import DataAnalysisEngine
 from .memory import MemoryStore
 from .multi_agent import MultiAgentEngine
 from .vector_memory import LocalVectorBackend, PostgresVectorBackend, VectorMemoryBackend
@@ -41,10 +42,11 @@ vector_backend, vector_backend_name = _build_vector_backend()
 store = MemoryStore(MEMORY_PATH, vector_backend=vector_backend)
 engine = AgentEngine(store)
 multi_engine = MultiAgentEngine(store)
+data_engine = DataAnalysisEngine(store)
 
 app = FastAPI(
     title="Omni-Agent AI",
-    version="3.1.0",
+    version="3.2.0",
     description="A testable LangGraph single-agent and self-planning multi-agent system with persistent memory.",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -82,7 +84,7 @@ async def health() -> dict[str, object]:
     return {
         "status": "ok",
         "memory_records": len(store.records),
-        "engines": ["langgraph-single", "langgraph-multi-agent"],
+        "engines": ["langgraph-single", "langgraph-multi-agent", "data-analysis-multi-agent"],
         "vector_store": vector_backend_name,
     }
 
@@ -112,6 +114,30 @@ async def multi_ask_agent(query: Query) -> dict[str, object]:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail="Multi-agent execution failed") from exc
+
+
+@app.post("/analyze-data")
+async def analyze_data(
+    file: UploadFile = File(..., description="CSV file to analyze"),
+    user_id: str = Form("default_user"),
+    session_id: str = Form("default_session"),
+) -> dict[str, object]:
+    """Analyze a CSV locally through profiling, insight, and quality specialists."""
+    try:
+        content = await file.read()
+        result = data_engine.run(
+            content,
+            source_name=file.filename or "upload.csv",
+            user_id=user_id,
+            session_id=session_id,
+        )
+        return {"status": "success", "mode": "data-analysis-multi-agent", "data": result}
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Data analysis failed") from exc
+    finally:
+        await file.close()
 
 
 @app.get("/tools")

@@ -4,3 +4,5 @@ pydantic==2.13.4
 langgraph==1.2.11
 pytest==9.1.1
 httpx==0.28.1
+pandas==2.3.3
+python-multipart==0.0.20

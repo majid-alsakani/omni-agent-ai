@@ -24,10 +24,11 @@ function labelStatus(isOnline) {
 }
 
 async function api(path, options = {}) {
-  const response = await fetch(path, {
-    headers: { "Content-Type": "application/json", ...(options.headers || {}) },
-    ...options,
-  });
+  const headers = { ...(options.headers || {}) };
+  if (!(options.body instanceof FormData) && !headers["Content-Type"]) {
+    headers["Content-Type"] = "application/json";
+  }
+  const response = await fetch(path, { ...options, headers });
   if (!response.ok) {
     const payload = await response.json().catch(() => ({}));
     throw new Error(payload.detail || `HTTP ${response.status}`);
@@ -145,8 +146,80 @@ async function runMission() {
   }
 }
 
+function renderDataResult(payload) {
+  const data = payload.data || {};
+  const overview = data.overview || {};
+  const quality = data.quality || {};
+  const insights = data.insights || {};
+  state.lastAnswer = data.summary || "";
+  $("copy-result").disabled = !state.lastAnswer;
+  const topCorrelation = insights.top_correlations?.[0];
+  const cards = [
+    ["الصفوف", overview.rows ?? "—"],
+    ["الأعمدة", overview.columns ?? "—"],
+    ["درجة الجودة", `${quality.score ?? "—"}/100`],
+    ["قيم ناقصة", `${quality.missing_rate ?? "—"}%`],
+  ];
+  const columns = (overview.column_names || []).slice(0, 18).map((column) => `<span>${escapeHtml(column)}</span>`).join("");
+  const agents = (data.agents || []).map((agent) => `<article class="agent-output"><strong>${escapeHtml(agent.agent)}</strong><p>${escapeHtml(agent.finding)}</p></article>`).join("");
+  const recommendations = (quality.recommendations || []).map((item) => `<p>${escapeHtml(item)}</p>`).join("");
+  $("data-result").className = "data-result";
+  $("data-result").innerHTML = `
+    <div class="data-summary">${escapeHtml(data.summary || "اكتمل التحليل.")}</div>
+    <div class="data-grid">${cards.map(([name, value]) => `<div class="data-card"><span>${escapeHtml(name)}</span><strong>${escapeHtml(value)}</strong></div>`).join("")}</div>
+    <div class="data-columns">${columns}</div>
+    ${topCorrelation ? `<div class="insight-list"><p>أقوى ارتباط: ${escapeHtml(topCorrelation.left)} ↔ ${escapeHtml(topCorrelation.right)} (${escapeHtml(topCorrelation.correlation)})</p></div>` : ""}
+    <div class="insight-list">${recommendations}</div>
+    ${agents ? `<div class="agent-output-list">${agents}</div>` : ""}`;
+  $("result-content").className = "";
+  $("result-content").innerHTML = `<div class="trace-grid"><div class="trace-item"><span>المسار</span><strong>تحليل بيانات</strong></div><div class="trace-item"><span>الوكلاء</span><strong>${escapeHtml(data.agents?.length ?? 0)}</strong></div><div class="trace-item"><span>الخصوصية</span><strong>محلي</strong></div></div><div class="answer">${escapeHtml(data.summary || "")}</div>`;
+  $("selected-mode-label").textContent = "DATA";
+}
+
+async function analyzeData() {
+  const input = $("data-file");
+  const file = input.files?.[0];
+  const userId = $("user-id").value.trim() || "command-center-user";
+  if (!file) {
+    $("data-request-status").textContent = "اختر ملف CSV أولاً.";
+    $("data-request-status").className = "request-status warning";
+    return;
+  }
+  const button = $("analyze-data");
+  button.disabled = true;
+  button.querySelector("span").textContent = "يجري التحليل...";
+  $("data-request-status").textContent = "وكلاء الاستكشاف والتحليل والجودة يراجعون الملف محلياً.";
+  $("data-request-status").className = "request-status";
+  $("data-result").className = "data-result loading-state";
+  $("data-result").textContent = "جاري قراءة CSV وإنشاء المخرجات...";
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("user_id", userId);
+    formData.append("session_id", "command-center-data-session");
+    const payload = await api("/analyze-data", { method: "POST", body: formData });
+    renderDataResult(payload);
+    $("data-request-status").textContent = "اكتمل تحليل البيانات عبر ثلاثة وكلاء بنجاح.";
+    $("data-request-status").className = "request-status success";
+    await Promise.all([refreshHealth(), refreshMemory()]);
+  } catch (error) {
+    $("data-result").className = "data-result error-box";
+    $("data-result").textContent = `تعذر تحليل الملف: ${error.message}`;
+    $("data-request-status").textContent = "تعذر إكمال التحليل.";
+    $("data-request-status").className = "request-status warning";
+  } finally {
+    button.disabled = false;
+    button.querySelector("span").textContent = "حلل البيانات";
+  }
+}
+
 $("run-mission").addEventListener("click", runMission);
 $("refresh-memory").addEventListener("click", refreshMemory);
+$("analyze-data").addEventListener("click", analyzeData);
+$("data-file").addEventListener("change", () => {
+  const file = $("data-file").files?.[0];
+  $("selected-file").textContent = file ? `${file.name} · ${(file.size / 1024).toFixed(1)} KB` : "لم يتم اختيار ملف";
+});
 $("copy-result").addEventListener("click", async () => {
   if (!state.lastAnswer) return;
   try {

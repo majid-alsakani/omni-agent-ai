@@ -23,6 +23,7 @@
         <nav aria-label="Navigation">
           <a class="nav-item active" href="#mission">مركز المهام</a>
           <a class="nav-item" href="#agents">تنسيق الوكلاء</a>
+          <a class="nav-item" href="#data-lab">مختبر تحليل البيانات</a>
           <a class="nav-item" href="#memory">الذاكرة السيادية</a>
           <a class="nav-item" href="#tools">الضوابط والأدوات</a>
         </nav>
@@ -125,6 +126,28 @@
             </div>
             <div class="agent-legend"><span><i class="research-dot"></i> بحث</span><span><i class="analyst-dot"></i> تحليل</span><span><i class="risk-dot"></i> مخاطر</span></div>
           </article>
+        </section>
+
+        <section id="data-lab" class="data-lab panel">
+          <div class="panel-heading">
+            <div>
+              <p class="eyebrow">Data Analysis Lab</p>
+              <h2>حلّل CSV بواسطة ثلاثة وكلاء متخصصين</h2>
+            </div>
+            <span class="mode-chip">LOCAL · PRIVATE</span>
+          </div>
+          <p class="data-lab-intro">يرفع الملف للتحليل داخل الخادم فقط؛ يُفحص هيكله وإحصاءاته وجودته، ولا يُحفظ محتوى الملف بعد انتهاء الطلب.</p>
+          <div class="data-upload-row">
+            <label class="file-picker" for="data-file"><span>اختر ملف CSV</span><input id="data-file" type="file" accept=".csv,text/csv" /></label>
+            <span id="selected-file" class="selected-file">لم يتم اختيار ملف</span>
+            <button id="analyze-data" class="primary-button"><span>حلل البيانات</span><i>↗</i></button>
+          </div>
+          <div id="data-request-status" class="request-status">الحد الأقصى: 5MB، 200 ألف صف، و100 عمود.</div>
+          <div id="data-result" class="data-result empty-data-result">
+            <div class="empty-orb"></div>
+            <h3>استكشف البيانات قبل اتخاذ القرار</h3>
+            <p>ستظهر البنية، العلاقات اللافتة، جودة البيانات، وتوصيات الوكلاء هنا.</p>
+          </div>
         </section>
 
         <section class="results-grid">

@@ -8,7 +8,8 @@
   <img src="https://img.shields.io/badge/Status-Autonomous%20Multi--Agent-16a34a?style=for-the-badge" alt="Multi-Agent">
   <img src="https://img.shields.io/badge/Orchestration-LangGraph-7c3aed?style=for-the-badge" alt="LangGraph">
   <img src="https://img.shields.io/badge/Memory-Vector%20DB%20Ready-0284c7?style=for-the-badge" alt="Vector Memory">
-  <img src="https://img.shields.io/badge/Tests-13%20passed-0f766e?style=for-the-badge" alt="Tests passed">
+  <img src="https://img.shields.io/badge/Data%20Analysis-CSV%20Agents-0ea5e9?style=for-the-badge" alt="Data analysis agents">
+  <img src="https://img.shields.io/badge/Tests-15%20passed-0f766e?style=for-the-badge" alt="Tests passed">
 </p>
 
 ---
@@ -29,6 +30,7 @@
 | مخطط الوكلاء وحالة المراجعة | شفافية: يظهر من شارك في المهمة وهل تمت الموافقة على المخرجات |
 | لوحة الذاكرة | يوضح ما يتذكره النظام في الجلسة والبيانات الدلالية ذات الصلة |
 | سجل الأدوات | يوضح أن التنفيذ مقيد بأدوات مسموحة وبوابة تأكيد للأفعال الخارجية |
+| **Data Analysis Lab** | رفع CSV وتحليل هيكله وعلاقاته وجودته عبر ثلاثة وكلاء محليين، من دون حفظ محتوى الملف |
 
 ## 🎨 The Multi-Agent Evolution & Sovereign Memory
 
@@ -40,9 +42,9 @@
 
 ---
 
-**Omni-Agent AI** هو نظام متطور لوكلاء الذكاء الاصطناعي المستقلين، يعتمد على بنية **التخطيط الذاتي متعدد الوكلاء (Multi-Agent Planning)**. النسخة 3.0 تنقل المشروع من مجرد وكيل واحد إلى "أوركسترا" من الوكلاء المتخصصين الذين يعملون بتناغم لحل المهام المعقدة، مع دعم كامل لقواعد البيانات المتجهية لضمان ذاكرة سيادية دائمة ودقيقة.
+**Omni-Agent AI** هو نظام متطور لوكلاء الذكاء الاصطناعي المستقلين، يعتمد على بنية **التخطيط الذاتي متعدد الوكلاء (Multi-Agent Planning)**. النسخة 3.2 تنقل المشروع من مجرد وكيل واحد إلى "أوركسترا" من الوكلاء المتخصصين الذين يعملون بتناغم لحل المهام المعقدة وتحليل ملفات CSV، مع دعم كامل لقواعد البيانات المتجهية لضمان ذاكرة سيادية دائمة ودقيقة.
 
-## 🌟 الميزات المتقدمة (نسخة 3.0)
+## 🌟 الميزات المتقدمة (نسخة 3.2)
 
 | الميزة | الوصف التقني | الفائدة |
 | --- | --- | --- |
@@ -51,6 +53,7 @@
 | **Vector Semantic Memory** | محرك ذاكرة متجهي يدعم pgvector و Local Hashed Vectors | استرجاع فائق السرعة والدقة للحقائق والتفضيلات الشخصية |
 | **Self-Correction Loop** | حلقة مراجعة ونقد ذاتي (Reflexion) قبل تسليم النتيجة النهائية | ضمان أعلى مستويات الدقة وتقليل الهلوسة البرمجية |
 | **Production Ready** | دعم كامل لـ Docker، PostgreSQL، وواجهة API متطورة | جاهزية تامة للنشر في بيئات الإنتاج السحابية |
+| **Data Analysis Lab** | وكلاء استكشاف وInsight وجودة لملفات CSV | يحول ملف البيانات إلى ملخص وتنبيهات قابلة للتنفيذ داخل الواجهة |
 
 ---
 
@@ -89,7 +92,18 @@ uvicorn backend.main:app --reload --port 8000
 
 افتح بعدها [http://127.0.0.1:8000](http://127.0.0.1:8000) للوصول إلى **Command Center**، أو [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs) لاستكشاف API.
 
-### 4. تجربة مهمة معقدة (Multi-Agent)
+### 4. تحليل ملف CSV تلقائياً
+
+من Command Center، انتقل إلى **Data Analysis Lab** واختر ملف CSV. أو جرّب API مباشرة:
+
+```bash
+curl -X POST http://127.0.0.1:8000/analyze-data \
+  -F 'file=@tests/fixtures/uci_iris.csv;type=text/csv' \
+  -F 'user_id=demo-user' \
+  -F 'session_id=data-session'
+```
+
+### 5. تجربة مهمة معقدة (Multi-Agent)
 ```bash
 curl -X POST http://127.0.0.1:8000/ask \
   -H 'Content-Type: application/json' \
@@ -118,6 +132,10 @@ curl http://127.0.0.1:8000/tools
 *   `docs/cloud_deployment_guide.md`: نشر PostgreSQL/pgvector على السحابة.
 *   `docs/advanced_scenarios.md`: سيناريوهات الأتمتة الاستراتيجية والتقنية.
 *   `backend/tools.py`: أدوات allowlisted مع بوابة موافقة بشرية.
+*   `backend/data_analysis.py`: محرك تحليل CSV المحلي متعدد الوكلاء.
+*   `tests/fixtures/uci_iris.csv`: بيانات اختبار حقيقية من UCI Iris.
+*   `docs/command_center_and_data_lab.md`: شرح لوحة التحكم، التشغيل المحلي، Data Analysis Lab، والسيناريو المتقدم.
+*   `docs/data_analysis_design.md`: تصميم مسار وكلاء تحليل البيانات وضوابط الخصوصية.
 *   `backend/static/`: لوحة Command Center التفاعلية (HTML/CSS/JavaScript) المرتبطة بالـ API الحقيقي.
 *   `docs/command_center_design.md`: مبررات تصميم المنتج وتدفق تجربة المستخدم.
 *   `docs/command_center_user_guide.md`: دليل استخدام عملي للمهام الفردية ومتعددة الوكلاء.
