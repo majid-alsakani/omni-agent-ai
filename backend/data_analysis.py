@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import io
 import math
+import os
 from pathlib import Path
 from typing import Any
 
@@ -17,8 +18,8 @@ import pandas as pd
 from .memory import MemoryStore
 
 
-MAX_FILE_BYTES = 5 * 1024 * 1024
-MAX_ROWS = 200_000
+MAX_FILE_BYTES = int(os.getenv("OMNI_MAX_UPLOAD_MB", "64")) * 1024 * 1024
+MAX_ROWS = int(os.getenv("OMNI_MAX_UPLOAD_ROWS", "1000000"))
 MAX_COLUMNS = 100
 
 
@@ -54,9 +55,10 @@ class DataAnalysisEngine:
         dataframe = self._read_csv(content, source_name)
         overview = self._profile_agent(dataframe)
         insights = self._insight_agent(dataframe, overview)
+        sales = self._sales_agent(dataframe)
         quality = self._quality_agent(dataframe, overview)
-        agents = self._agent_outputs(overview, insights, quality)
-        summary = self._synthesize(source_name, overview, insights, quality)
+        agents = self._agent_outputs(overview, insights, quality, sales)
+        summary = self._synthesize(source_name, overview, insights, quality, sales)
 
         self.memory.add(
             (
@@ -64,6 +66,7 @@ class DataAnalysisEngine:
                 f"{overview['rows']} صفاً و{overview['columns']} عموداً؛ "
                 f"درجة الجودة {quality['score']}/100؛ "
                 f"أبرز نتيجة: {insights['headline']}"
+                + (f"؛ صافي مبيعات مقدر {sales['net_revenue']:.2f}" if sales["detected"] else "")
             ),
             kind="episodic",
             user_id=user_id,
@@ -75,6 +78,8 @@ class DataAnalysisEngine:
                 "rows": overview["rows"],
                 "columns": overview["columns"],
                 "quality_score": quality["score"],
+                "sales_detected": sales["detected"],
+                "net_revenue": sales.get("net_revenue"),
             },
         )
 
@@ -83,6 +88,7 @@ class DataAnalysisEngine:
             "source": {"name": Path(source_name).name, "stored": False},
             "overview": overview,
             "insights": insights,
+            "sales": sales,
             "quality": quality,
             "agents": agents,
             "summary": summary,
@@ -193,6 +199,54 @@ class DataAnalysisEngine:
             "dominant_categories": dominant[:3],
         }
 
+    def _sales_agent(self, dataframe: pd.DataFrame) -> dict[str, Any]:
+        """Recognize common retail columns and calculate explainable commercial metrics."""
+        aliases = {str(column).casefold().replace(" ", ""): str(column) for column in dataframe.columns}
+        quantity = aliases.get("quantity")
+        unit_price = aliases.get("unitprice") or aliases.get("price")
+        invoice = aliases.get("invoiceno") or aliases.get("invoice") or aliases.get("orderid")
+        product = aliases.get("description") or aliases.get("product") or aliases.get("productname")
+        country = aliases.get("country") or aliases.get("market")
+        customer = aliases.get("customerid") or aliases.get("customer")
+        if not quantity or not unit_price:
+            return {"detected": False, "reason": "لم تُكتشف حقول كمية وسعر موحدة؛ تم تنفيذ التحليل العام فقط."}
+
+        sales = dataframe.copy()
+        sales["__quantity"] = pd.to_numeric(sales[quantity], errors="coerce").fillna(0)
+        sales["__unit_price"] = pd.to_numeric(sales[unit_price], errors="coerce").fillna(0)
+        sales["__line_value"] = sales["__quantity"] * sales["__unit_price"]
+        cancelled = pd.Series(False, index=sales.index)
+        if invoice:
+            cancelled = sales[invoice].astype("string").str.casefold().str.startswith("c", na=False)
+        completed = sales.loc[~cancelled].copy()
+        net_revenue = float(sales["__line_value"].sum())
+        completed_revenue = float(completed["__line_value"].sum())
+        cancellation_value = float(sales.loc[cancelled, "__line_value"].sum())
+        orders = int(completed[invoice].nunique()) if invoice else None
+        customers = int(completed[customer].nunique()) if customer else None
+        average_order = round(completed_revenue / orders, 2) if orders else None
+
+        def ranked(column: str | None, value_column: str = "__line_value") -> list[dict[str, Any]]:
+            if not column:
+                return []
+            grouped = completed.groupby(column, dropna=True)[value_column].sum().sort_values(ascending=False).head(5)
+            return [{"name": str(name), "revenue": round(float(value), 2)} for name, value in grouped.items()]
+
+        return {
+            "detected": True,
+            "quantity_column": quantity,
+            "unit_price_column": unit_price,
+            "net_revenue": round(net_revenue, 2),
+            "completed_revenue": round(completed_revenue, 2),
+            "cancellation_value": round(cancellation_value, 2),
+            "cancellation_rows": int(cancelled.sum()),
+            "completed_orders": orders,
+            "unique_customers": customers,
+            "average_order_value": average_order,
+            "top_markets": ranked(country),
+            "top_products": ranked(product),
+        }
+
     def _quality_agent(self, dataframe: pd.DataFrame, overview: dict[str, Any]) -> dict[str, Any]:
         rows = max(1, overview["rows"])
         columns = max(1, overview["columns"])
@@ -241,8 +295,8 @@ class DataAnalysisEngine:
             "recommendations": recommendations,
         }
 
-    def _agent_outputs(self, overview: dict[str, Any], insights: dict[str, Any], quality: dict[str, Any]) -> list[dict[str, Any]]:
-        return [
+    def _agent_outputs(self, overview: dict[str, Any], insights: dict[str, Any], quality: dict[str, Any], sales: dict[str, Any]) -> list[dict[str, Any]]:
+        outputs = [
             {
                 "agent": "Data Profiling Agent",
                 "status": "completed",
@@ -259,13 +313,32 @@ class DataAnalysisEngine:
                 "finding": f"درجة الجودة {quality['score']}/100 ({quality['status']}) مع نسبة قيم ناقصة {quality['missing_rate']}%.",
             },
         ]
+        if sales["detected"]:
+            outputs.append(
+                {
+                    "agent": "Sales Intelligence Agent",
+                    "status": "completed",
+                    "finding": (
+                        f"صافي المبيعات المحسوب {sales['net_revenue']:.2f}؛ "
+                        f"الطلبات المكتملة {sales['completed_orders'] or 'غير متاح'}؛ "
+                        f"وقيمة الإلغاءات {sales['cancellation_value']:.2f}."
+                    ),
+                }
+            )
+        return outputs
 
-    def _synthesize(self, source_name: str, overview: dict[str, Any], insights: dict[str, Any], quality: dict[str, Any]) -> str:
+    def _synthesize(self, source_name: str, overview: dict[str, Any], insights: dict[str, Any], quality: dict[str, Any], sales: dict[str, Any]) -> str:
         recommendations = " ".join(quality["recommendations"][:2])
+        sales_text = ""
+        if sales["detected"]:
+            sales_text = (
+                f" وكيل المبيعات قدّر صافي المبيعات بـ {sales['net_revenue']:.2f}، "
+                f"والمبيعات المكتملة بـ {sales['completed_revenue']:.2f}."
+            )
         return (
-            f"تم تحليل ملف {Path(source_name).name} محلياً عبر ثلاثة وكلاء. "
+            f"تم تحليل ملف {Path(source_name).name} محلياً عبر وكلاء متخصصين. "
             f"يتكون من {overview['rows']} صفاً و{overview['columns']} عموداً. "
             f"{insights['headline']} "
-            f"درجة جودة البيانات {quality['score']}/100 ({quality['status']}). "
-            f"الخطوة المقترحة: {recommendations}"
+            f"درجة جودة البيانات {quality['score']}/100 ({quality['status']})."
+            f"{sales_text} الخطوة المقترحة: {recommendations}"
         )

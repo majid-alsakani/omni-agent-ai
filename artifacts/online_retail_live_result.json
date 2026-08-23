@@ -1,0 +1,297 @@
+{
+  "dataset": {
+    "file": "online_retail.csv",
+    "bytes": 48039726
+  },
+  "analysis_runtime_seconds": 2.5,
+  "twin_runtime_seconds": 2.48,
+  "analysis": {
+    "overview": {
+      "rows": 541909,
+      "columns": 8,
+      "column_names": [
+        "InvoiceNo",
+        "StockCode",
+        "Description",
+        "Quantity",
+        "InvoiceDate",
+        "UnitPrice",
+        "CustomerID",
+        "Country"
+      ],
+      "numeric_columns": [
+        "Quantity",
+        "UnitPrice",
+        "CustomerID"
+      ],
+      "categorical_columns": [
+        "InvoiceNo",
+        "StockCode",
+        "Description",
+        "InvoiceDate",
+        "Country"
+      ],
+      "dtypes": {
+        "InvoiceNo": "object",
+        "StockCode": "object",
+        "Description": "object",
+        "Quantity": "int64",
+        "InvoiceDate": "object",
+        "UnitPrice": "float64",
+        "CustomerID": "float64",
+        "Country": "object"
+      },
+      "missing_cells": 136534,
+      "missing_by_column": {
+        "Description": 1454,
+        "CustomerID": 135080
+      },
+      "duplicates": 5268,
+      "numeric_summary": {
+        "Quantity": {
+          "min": -80995,
+          "mean": 9.5522,
+          "median": 3.0,
+          "max": 80995,
+          "std": 218.0812
+        },
+        "UnitPrice": {
+          "min": -11062.06,
+          "mean": 4.6111,
+          "median": 2.08,
+          "max": 38970.0,
+          "std": 96.7599
+        },
+        "CustomerID": {
+          "min": 12346.0,
+          "mean": 15287.6906,
+          "median": 15152.0,
+          "max": 18287.0,
+          "std": 1713.6003
+        }
+      },
+      "top_categories": {
+        "InvoiceNo": [
+          {
+            "value": "573585",
+            "count": 1114,
+            "share": 0.21
+          },
+          {
+            "value": "581219",
+            "count": 749,
+            "share": 0.14
+          },
+          {
+            "value": "581492",
+            "count": 731,
+            "share": 0.13
+          }
+        ],
+        "StockCode": [
+          {
+            "value": "85123A",
+            "count": 2313,
+            "share": 0.43
+          },
+          {
+            "value": "22423",
+            "count": 2203,
+            "share": 0.41
+          },
+          {
+            "value": "85099B",
+            "count": 2159,
+            "share": 0.4
+          }
+        ],
+        "Description": [
+          {
+            "value": "WHITE HANGING HEART T-LIGHT HOLDER",
+            "count": 2369,
+            "share": 0.44
+          },
+          {
+            "value": "REGENCY CAKESTAND 3 TIER",
+            "count": 2200,
+            "share": 0.41
+          },
+          {
+            "value": "JUMBO BAG RED RETROSPOT",
+            "count": 2159,
+            "share": 0.4
+          }
+        ],
+        "InvoiceDate": [
+          {
+            "value": "2011-10-31 14:41:00",
+            "count": 1114,
+            "share": 0.21
+          },
+          {
+            "value": "2011-12-08 09:28:00",
+            "count": 749,
+            "share": 0.14
+          },
+          {
+            "value": "2011-12-09 10:03:00",
+            "count": 731,
+            "share": 0.13
+          }
+        ],
+        "Country": [
+          {
+            "value": "United Kingdom",
+            "count": 495478,
+            "share": 91.43
+          },
+          {
+            "value": "Germany",
+            "count": 9495,
+            "share": 1.75
+          },
+          {
+            "value": "France",
+            "count": 8557,
+            "share": 1.58
+          }
+        ]
+      }
+    },
+    "quality": {
+      "score": 97,
+      "status": "ممتازة",
+      "missing_rate": 3.15,
+      "duplicate_rate": 0.97,
+      "outlier_rate": 6.04,
+      "constant_columns": [],
+      "recommendations": [
+        "عالج القيم الناقصة أو وضح سبب بقائها قبل بناء قرار عليها.",
+        "راجع الصفوف المكررة قبل حساب المقاييس النهائية.",
+        "راجع القيم الشاذة لأنها قد تغير المتوسطات والارتباطات."
+      ]
+    },
+    "headline": "أقوى علاقة رقمية بين UnitPrice وCustomerID بمعامل -0.0046.",
+    "sales": {
+      "detected": true,
+      "quantity_column": "Quantity",
+      "unit_price_column": "UnitPrice",
+      "net_revenue": 9747747.93,
+      "completed_revenue": 10644560.42,
+      "cancellation_value": -896812.49,
+      "cancellation_rows": 9288,
+      "completed_orders": 22064,
+      "unique_customers": 4339,
+      "average_order_value": 482.44,
+      "top_markets": [
+        {
+          "name": "United Kingdom",
+          "revenue": 9003097.96
+        },
+        {
+          "name": "Netherlands",
+          "revenue": 285446.34
+        },
+        {
+          "name": "EIRE",
+          "revenue": 283453.96
+        },
+        {
+          "name": "Germany",
+          "revenue": 228867.14
+        },
+        {
+          "name": "France",
+          "revenue": 209715.11
+        }
+      ],
+      "top_products": [
+        {
+          "name": "DOTCOM POSTAGE",
+          "revenue": 206248.77
+        },
+        {
+          "name": "REGENCY CAKESTAND 3 TIER",
+          "revenue": 174484.74
+        },
+        {
+          "name": "PAPER CRAFT , LITTLE BIRDIE",
+          "revenue": 168469.6
+        },
+        {
+          "name": "WHITE HANGING HEART T-LIGHT HOLDER",
+          "revenue": 106292.77
+        },
+        {
+          "name": "PARTY BUNTING",
+          "revenue": 99504.33
+        }
+      ]
+    },
+    "agents": [
+      {
+        "agent": "Data Profiling Agent",
+        "status": "completed",
+        "finding": "تم فحص 541909 صفاً و8 عموداً؛ 3 أعمدة رقمية و5 فئوية."
+      },
+      {
+        "agent": "Insight Agent",
+        "status": "completed",
+        "finding": "أقوى علاقة رقمية بين UnitPrice وCustomerID بمعامل -0.0046."
+      },
+      {
+        "agent": "Data Quality Agent",
+        "status": "completed",
+        "finding": "درجة الجودة 97/100 (ممتازة) مع نسبة قيم ناقصة 3.15%."
+      },
+      {
+        "agent": "Sales Intelligence Agent",
+        "status": "completed",
+        "finding": "صافي المبيعات المحسوب 9747747.93؛ الطلبات المكتملة 22064؛ وقيمة الإلغاءات -896812.49."
+      }
+    ],
+    "summary": "تم تحليل ملف online_retail.csv محلياً عبر وكلاء متخصصين. يتكون من 541909 صفاً و8 عموداً. أقوى علاقة رقمية بين UnitPrice وCustomerID بمعامل -0.0046. درجة جودة البيانات 97/100 (ممتازة). وكيل المبيعات قدّر صافي المبيعات بـ 9747747.93، والمبيعات المكتملة بـ 10644560.42. الخطوة المقترحة: عالج القيم الناقصة أو وضح سبب بقائها قبل بناء قرار عليها. راجع الصفوف المكررة قبل حساب المقاييس النهائية."
+  },
+  "strategic_twin": {
+    "draft_id": "decision_36369ae917a9",
+    "status": "pending_human_review",
+    "precedent_count": 0,
+    "plan": [
+      {
+        "agent": "Precedent Retrieval Agent",
+        "action": "استدعاء سوابق معتمدة ذات معنى قريب من الهدف",
+        "status": "0 سوابق مسترجعة"
+      },
+      {
+        "agent": "Data Evidence Agent",
+        "action": "فحص الملف وتقييم جودة الدليل الجديد",
+        "status": "جودة 97/100"
+      },
+      {
+        "agent": "Sales Intelligence Agent",
+        "action": "قياس المبيعات والطلبات والإلغاءات والأسواق",
+        "status": "مكتمل"
+      },
+      {
+        "agent": "Strategic Planner",
+        "action": "تحديد أسئلة التحقق والفجوات قبل التوصية",
+        "status": "مكتمل"
+      },
+      {
+        "agent": "Risk & Governance Agent",
+        "action": "منع التنفيذ الخارجي وإلزام الموافقة البشرية",
+        "status": "مراجعة بشرية مطلوبة"
+      }
+    ],
+    "assessment": {
+      "recommendation": "نفّذ تجربة محدودة قابلة للقياس، ثم راجع المؤشرات والنتائج قبل التوسع.",
+      "confidence_score": 83,
+      "review_required": true,
+      "gaps_and_risks": [
+        "لا توجد سوابق معتمدة مسترجعة؛ تعامل مع التوصية باعتبارها تجربة محكومة لا سياسة ثابتة.",
+        "توجد معاملات إلغاء؛ راجع أثرها قبل تفسير إجمالي المبيعات كطلب نهائي."
+      ],
+      "objective": "تقييم تجربة توسع تجاري محدودة مع مراقبة الإلغاءات وقيمة الطلبات في أسواق التجزئة."
+    }
+  }
+}

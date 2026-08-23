@@ -1,0 +1,30 @@
+flowchart LR
+  A[ملف بيانات CSV] --> B[Data Analysis Lab]
+  B --> C[Profiling Agent]
+  B --> D[Insight Agent]
+  B --> E[Sales Intelligence Agent]
+  B --> F[Data Quality Agent]
+
+  G[هدف القرار] --> H[Precedent Retrieval Agent]
+  I[(Vector Memory\npgvector أو Local)] --> H
+  H --> J[Strategic Planner]
+  C --> J
+  D --> J
+  E --> J
+  F --> J
+
+  J --> K[مسودة قرار + مؤشر ثقة]
+  K --> L{مراجعة بشرية}
+  L -->|اعتماد صريح| M[Semantic Decision Memory]
+  M --> I
+  L -->|طلب مزيد من الدليل| N[دورة تحقق جديدة]
+  N --> B
+
+  classDef data fill:#13213e,stroke:#42d3ff,color:#ffffff
+  classDef agent fill:#2a1b57,stroke:#b69bff,color:#ffffff
+  classDef gate fill:#583916,stroke:#ffc46b,color:#ffffff
+  classDef memory fill:#153d38,stroke:#57e2ab,color:#ffffff
+  class A,B data
+  class C,D,E,F,H,J,K agent
+  class L,N gate
+  class I,M memory

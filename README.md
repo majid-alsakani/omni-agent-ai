@@ -9,7 +9,7 @@
   <img src="https://img.shields.io/badge/Orchestration-LangGraph-7c3aed?style=for-the-badge" alt="LangGraph">
   <img src="https://img.shields.io/badge/Memory-Vector%20DB%20Ready-0284c7?style=for-the-badge" alt="Vector Memory">
   <img src="https://img.shields.io/badge/Data%20Analysis-CSV%20Agents-0ea5e9?style=for-the-badge" alt="Data analysis agents">
-  <img src="https://img.shields.io/badge/Tests-15%20passed-0f766e?style=for-the-badge" alt="Tests passed">
+  <img src="https://img.shields.io/badge/Tests-18%20passed-0f766e?style=for-the-badge" alt="Tests passed">
 </p>
 
 ---
@@ -30,7 +30,8 @@
 | مخطط الوكلاء وحالة المراجعة | شفافية: يظهر من شارك في المهمة وهل تمت الموافقة على المخرجات |
 | لوحة الذاكرة | يوضح ما يتذكره النظام في الجلسة والبيانات الدلالية ذات الصلة |
 | سجل الأدوات | يوضح أن التنفيذ مقيد بأدوات مسموحة وبوابة تأكيد للأفعال الخارجية |
-| **Data Analysis Lab** | رفع CSV وتحليل هيكله وعلاقاته وجودته عبر ثلاثة وكلاء محليين، من دون حفظ محتوى الملف |
+| **Data Analysis Lab** | رفع CSV وتحليل هيكله وعلاقاته وجودته ومؤشرات المبيعات عبر وكلاء محليين، من دون حفظ محتوى الملف |
+| **Strategic Decision Twin** | استدعاء سوابق الذاكرة، تحليل دليل CSV، وصياغة مسودة قرار قابلة للمراجعة والاعتماد البشري |
 
 ## 🎨 The Multi-Agent Evolution & Sovereign Memory
 
@@ -42,9 +43,9 @@
 
 ---
 
-**Omni-Agent AI** هو نظام متطور لوكلاء الذكاء الاصطناعي المستقلين، يعتمد على بنية **التخطيط الذاتي متعدد الوكلاء (Multi-Agent Planning)**. النسخة 3.2 تنقل المشروع من مجرد وكيل واحد إلى "أوركسترا" من الوكلاء المتخصصين الذين يعملون بتناغم لحل المهام المعقدة وتحليل ملفات CSV، مع دعم كامل لقواعد البيانات المتجهية لضمان ذاكرة سيادية دائمة ودقيقة.
+**Omni-Agent AI** هو نظام متطور لوكلاء الذكاء الاصطناعي المستقلين، يعتمد على بنية **التخطيط الذاتي متعدد الوكلاء (Multi-Agent Planning)**. النسخة 3.3 تضيف **التوأم الاستراتيجي المتعلم**: يستدعي سوابق ذات صلة من الذاكرة المتجهية، يحلل دليلاً جديداً عبر وكلاء متخصصين، ويُنتج مسودة قرار قابلة للمراجعة لا تصبح معرفة دلالية إلا بعد موافقة بشرية صريحة.
 
-## 🌟 الميزات المتقدمة (نسخة 3.2)
+## 🌟 الميزات المتقدمة (نسخة 3.3)
 
 | الميزة | الوصف التقني | الفائدة |
 | --- | --- | --- |
@@ -53,7 +54,8 @@
 | **Vector Semantic Memory** | محرك ذاكرة متجهي يدعم pgvector و Local Hashed Vectors | استرجاع فائق السرعة والدقة للحقائق والتفضيلات الشخصية |
 | **Self-Correction Loop** | حلقة مراجعة ونقد ذاتي (Reflexion) قبل تسليم النتيجة النهائية | ضمان أعلى مستويات الدقة وتقليل الهلوسة البرمجية |
 | **Production Ready** | دعم كامل لـ Docker، PostgreSQL، وواجهة API متطورة | جاهزية تامة للنشر في بيئات الإنتاج السحابية |
-| **Data Analysis Lab** | وكلاء استكشاف وInsight وجودة لملفات CSV | يحول ملف البيانات إلى ملخص وتنبيهات قابلة للتنفيذ داخل الواجهة |
+| **Data Analysis Lab** | وكلاء استكشاف وInsight وجودة ومبيعات لملفات CSV | يحول ملف البيانات إلى ملخص وتنبيهات ومؤشرات مبيعات قابلة للتنفيذ داخل الواجهة |
+| **Strategic Decision Twin** | استدعاء سوابق، تخطيط تحقق، تقييم أدلة، ومراجعة بشرية | يحول الدليل الجديد إلى مسودة قرار شفافة ويتعلم فقط بعد اعتماد صريح |
 
 ---
 
@@ -80,7 +82,7 @@ pip install -r backend/requirements.txt
 pip install -r backend/requirements-vector.txt
 ```
 
-### 2. تشغيل الاختبارات الشاملة (11 اختباراً)
+### 2. تشغيل الاختبارات الشاملة (18 اختباراً)
 ```bash
 pytest -v
 ```
@@ -103,7 +105,19 @@ curl -X POST http://127.0.0.1:8000/analyze-data \
   -F 'session_id=data-session'
 ```
 
-### 5. تجربة مهمة معقدة (Multi-Agent)
+### 5. إنشاء مسودة قرار بالتوأم الاستراتيجي
+
+```bash
+curl -X POST http://127.0.0.1:8000/strategic-twin/analyze-data \
+  -F 'file=@tests/fixtures/uci_online_retail_excerpt.csv;type=text/csv' \
+  -F 'objective=تقييم تجربة توسع محدودة مع مراقبة الإلغاءات' \
+  -F 'user_id=demo-user' \
+  -F 'session_id=twin-session'
+```
+
+المسودة الناتجة تكون في حالة `pending_human_review`. لا يتحول القرار إلى ذاكرة دلالية قبل استدعاء مسار الاعتماد `POST /strategic-twin/approve` مع ملاحظة اعتماد صريحة.
+
+### 6. تجربة مهمة معقدة (Multi-Agent)
 ```bash
 curl -X POST http://127.0.0.1:8000/ask \
   -H 'Content-Type: application/json' \
@@ -132,7 +146,8 @@ curl http://127.0.0.1:8000/tools
 *   `docs/cloud_deployment_guide.md`: نشر PostgreSQL/pgvector على السحابة.
 *   `docs/advanced_scenarios.md`: سيناريوهات الأتمتة الاستراتيجية والتقنية.
 *   `backend/tools.py`: أدوات allowlisted مع بوابة موافقة بشرية.
-*   `backend/data_analysis.py`: محرك تحليل CSV المحلي متعدد الوكلاء.
+*   `backend/data_analysis.py`: محرك تحليل CSV المحلي متعدد الوكلاء، بما فيه وكيل المبيعات للحقول التجارية الشائعة.
+*   `backend/strategic_twin.py`: دورة التوأم الاستراتيجي لمسودة القرار، استدعاء السوابق، والاعتماد البشري.
 *   `tests/fixtures/uci_iris.csv`: بيانات اختبار حقيقية من UCI Iris.
 *   `docs/command_center_and_data_lab.md`: شرح لوحة التحكم، التشغيل المحلي، Data Analysis Lab، والسيناريو المتقدم.
 *   `docs/data_analysis_design.md`: تصميم مسار وكلاء تحليل البيانات وضوابط الخصوصية.
@@ -140,6 +155,9 @@ curl http://127.0.0.1:8000/tools
 *   `docs/command_center_design.md`: مبررات تصميم المنتج وتدفق تجربة المستخدم.
 *   `docs/command_center_user_guide.md`: دليل استخدام عملي للمهام الفردية ومتعددة الوكلاء.
 *   `artifacts/command_center_validation.md`: توثيق اختبار المتصفح الحي للواجهة.
+*   `docs/strategic_twin_design.md`: تصميم دورة القرار المتعلم وضوابط الحوكمة.
+*   `docs/online_retail_large_test_report.md`: تقرير اختبار حي لملف مبيعات UCI Online Retail مكوّن من 541,909 معاملة.
+*   `artifacts/online_retail_visuals.png`: رسم بياني للإيراد اليومي والأسواق الأعلى في الاختبار الحقيقي.
 
 ---
 

@@ -15,11 +15,13 @@ from .agent_engine import AgentEngine
 from .data_analysis import DataAnalysisEngine
 from .memory import MemoryStore
 from .multi_agent import MultiAgentEngine
+from .strategic_twin import StrategicTwinEngine
 from .vector_memory import LocalVectorBackend, PostgresVectorBackend, VectorMemoryBackend
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MEMORY_PATH = PROJECT_ROOT / "data" / "memory.json"
+TWIN_DRAFT_PATH = PROJECT_ROOT / "data" / "strategic_twin_drafts.json"
 STATIC_DIR = Path(__file__).resolve().parent / "static"
 
 
@@ -43,13 +45,21 @@ store = MemoryStore(MEMORY_PATH, vector_backend=vector_backend)
 engine = AgentEngine(store)
 multi_engine = MultiAgentEngine(store)
 data_engine = DataAnalysisEngine(store)
+twin_engine = StrategicTwinEngine(store, data_engine, draft_path=TWIN_DRAFT_PATH)
 
 app = FastAPI(
     title="Omni-Agent AI",
-    version="3.2.0",
+    version="3.3.0",
     description="A testable LangGraph single-agent and self-planning multi-agent system with persistent memory.",
 )
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+
+
+class TwinApproval(BaseModel):
+    draft_id: str = Field(min_length=1, max_length=128)
+    user_id: str = Field(default="default_user", min_length=1, max_length=128)
+    approval_note: str = Field(min_length=3, max_length=2_000)
+    outcome: str | None = Field(default=None, max_length=2_000)
 
 
 class Query(BaseModel):
@@ -84,7 +94,7 @@ async def health() -> dict[str, object]:
     return {
         "status": "ok",
         "memory_records": len(store.records),
-        "engines": ["langgraph-single", "langgraph-multi-agent", "data-analysis-multi-agent"],
+        "engines": ["langgraph-single", "langgraph-multi-agent", "data-analysis-multi-agent", "strategic-decision-twin"],
         "vector_store": vector_backend_name,
     }
 
@@ -138,6 +148,54 @@ async def analyze_data(
         raise HTTPException(status_code=500, detail="Data analysis failed") from exc
     finally:
         await file.close()
+
+
+@app.post("/strategic-twin/analyze-data")
+async def analyze_with_strategic_twin(
+    file: UploadFile = File(..., description="CSV file used as fresh decision evidence"),
+    objective: str = Form(..., min_length=3, max_length=10_000),
+    user_id: str = Form("default_user"),
+    session_id: str = Form("default_session"),
+) -> dict[str, object]:
+    """Create a reviewable strategic decision draft; no external action is performed."""
+    try:
+        content = await file.read()
+        draft = twin_engine.analyze(
+            content,
+            source_name=file.filename or "upload.csv",
+            objective=objective,
+            user_id=user_id,
+            session_id=session_id,
+        )
+        return {"status": "success", "mode": "strategic-decision-twin", "data": draft}
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail="Strategic twin analysis failed") from exc
+    finally:
+        await file.close()
+
+
+@app.get("/strategic-twin/precedents")
+async def strategic_twin_precedents(objective: str, user_id: str = "default_user") -> dict[str, object]:
+    if not objective.strip():
+        raise HTTPException(status_code=422, detail="اكتب هدفاً للبحث عن السوابق")
+    items = twin_engine.precedents(objective, user_id=user_id)
+    return {"count": len(items), "items": items}
+
+
+@app.post("/strategic-twin/approve")
+async def approve_strategic_twin(approval: TwinApproval) -> dict[str, object]:
+    try:
+        draft = twin_engine.approve(
+            approval.draft_id,
+            user_id=approval.user_id,
+            approval_note=approval.approval_note,
+            outcome=approval.outcome,
+        )
+        return {"status": "success", "mode": "strategic-decision-twin", "data": draft}
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
 
 
 @app.get("/tools")
